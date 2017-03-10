@@ -6,5 +6,7 @@
   <packaging>pom</packaging>
   <modules>
   	<module>StegHash-Engine</module>
+  	<module>PatrykBak.StegHash-Webapp</module>
+  	<module>PatrykBak.StegHash-Model</module>
   </modules>
 </project>
