@@ -23,6 +23,8 @@ public class User {
     private String role;
 	@Column(name = "enabled", nullable = false)
 	private int enabled;
+	@Column(name = "email", nullable = false)
+	private String email;
 	
 	public long getId() {
 		return id;
@@ -50,6 +52,12 @@ public class User {
 	}
 	public void setEnabled(int enabled) {
 		this.enabled = enabled;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
 	}
 	
 }

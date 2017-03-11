@@ -20,5 +20,6 @@
 				 <input type="submit" value="Login" />
 		</form>
 	</div>
+	<a href="registration">Register account</a>
 </body>
 </html>
