@@ -1,10 +1,11 @@
 package webapp.services;
 
-import javax.validation.Validator;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.Validator;
 
 import webapp.dto.UserDTO;
 
@@ -16,14 +17,14 @@ import webapp.model.UserDAO;
 public class UserService {
 
 	@Autowired
+	Validator validator;
+	
+	@Autowired
 	IUserService userInterface;
 	
 	@Autowired
 	UserDAO dao;
-	
-	@Autowired
-	Validator validator;
-	
+		
 	@Transactional
 	public void registerNewUserAccount(UserDTO userDTO) throws EmailExistsException{
 		
@@ -37,6 +38,8 @@ public class UserService {
 		userToAdd.setEmail(userDTO.getEmail());
 		userToAdd.setUsername(userDTO.getUsername());
 		userToAdd.setPassword(userDTO.getPassword());
+		userToAdd.setRole("ROLE_USER");
+		userToAdd.setEnabled(1);
 		dao.addUser(userToAdd);
 	}
 	

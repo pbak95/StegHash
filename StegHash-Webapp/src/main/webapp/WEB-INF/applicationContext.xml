@@ -4,6 +4,7 @@
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
 	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:aop="http://www.springframework.org/schema/aop"
 	xsi:schemaLocation="
  http://www.springframework.org/schema/mvc 
  http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
@@ -14,12 +15,16 @@
  http://www.springframework.org/schema/data/jpa 
  http://www.springframework.org/schema/data/jpa/spring-jpa-1.0.xsd
  http://www.springframework.org/schema/security
- http://www.springframework.org/schema/security/spring-security.xsd">
+ http://www.springframework.org/schema/security/spring-security.xsd
+ http://www.springframework.org/schema/aop
+ http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
 
 	<context:component-scan base-package="webapp" />
-	<!--  <context:annotation-config />-->
+	<!-- <context:annotation-config /> -->
 	<jpa:repositories base-package="webapp.model" />
 	<mvc:annotation-driven />  <!-- for validation -->
+	<!-- Enable AspectJ style of Spring AOP -->
+	<aop:aspectj-autoproxy />
 	<security:global-method-security
 		secured-annotations="enabled" pre-post-annotations="enabled" />
 	<bean
@@ -48,8 +53,9 @@
 		</property>
 	</bean>
 	<bean id="validator"
-    class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
-	<bean class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor"/>
+		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
+	<bean
+		class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor" />
 	<bean
 		class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
 	<bean
@@ -57,4 +63,6 @@
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory" ref="entityManagerFactory" />
 	</bean>
+	<!-- Annnotation beans -->
+	<bean name="userAspect" class="webapp.aspects.UserAspect" />
 </beans>

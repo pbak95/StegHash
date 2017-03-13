@@ -45,7 +45,7 @@ public class StegController {
 //	}
 	
 	@RequestMapping(value="/registration")
-	public String registerValidation(HttpServletRequest request,@ModelAttribute("userDTO") @Valid UserDTO userDTO, BindingResult result){
+	public String registerValidation(HttpServletRequest request, @ModelAttribute("userDTO") @Valid UserDTO userDTO, BindingResult result){
 		if(request.getMethod().equalsIgnoreCase("post") && !result.hasErrors()){
 			
 			try {
@@ -54,7 +54,7 @@ public class StegController {
 				result.rejectValue("email", "This e-mail address exists");
 				return "registration";
 			}
-			return "redirect:/home";	
+			return "home";	
 		}
 		return "registration";
 	}
