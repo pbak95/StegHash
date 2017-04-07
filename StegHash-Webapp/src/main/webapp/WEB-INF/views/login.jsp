@@ -12,12 +12,20 @@
 		<c:set var="loginUrl">
 			<c:url value="/login" />
 		</c:set>
-		<h2>Login form:</h2><br/>
-		<form method="post" action="${loginUrl}">
-			<input type="text" name="email" />
-			 <input type="password" name="password" />
-				 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" /> 
-				 <input type="submit" value="Login" />
+		<h2>Login form:</h2>
+		<br />
+		<c:if test="${not empty error}">
+			<div>${error}</div>
+		</c:if>
+		<c:if test="${not empty message}">
+			<div>${message}</div>
+		</c:if>
+		<form action="${loginUrl}" method="POST">
+			<input type="text" name="username" /> <input type="password"
+				name="password" /> 
+			<input type="hidden"
+				name="${_csrf.parameterName}" value="${_csrf.token}" /> <input
+				type="submit" value="Login" />
 		</form>
 	</div>
 	<a href="registration">Register account</a>

@@ -11,22 +11,31 @@
  http://www.springframework.org/schema/beans 
  http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
  http://www.springframework.org/schema/context 
- http://www.springframework.org/schema/context/spring-context-4.0.xsd
+ http://www.springframework.org/schema/context/spring-context.xsd
  http://www.springframework.org/schema/data/jpa 
  http://www.springframework.org/schema/data/jpa/spring-jpa-1.0.xsd
  http://www.springframework.org/schema/security
  http://www.springframework.org/schema/security/spring-security.xsd
  http://www.springframework.org/schema/aop
- http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+ http://www.springframework.org/schema/aop/spring-aop.xsd ">
 
 	<context:component-scan base-package="webapp" />
 	<!-- <context:annotation-config /> -->
 	<jpa:repositories base-package="webapp.model" />
 	<mvc:annotation-driven />  <!-- for validation -->
-	<!-- Enable AspectJ style of Spring AOP -->
-	<aop:aspectj-autoproxy />
+	<aop:aspectj-autoproxy />		<!-- Enable AspectJ style of Spring AOP -->
 	<security:global-method-security
 		secured-annotations="enabled" pre-post-annotations="enabled" />
+
+	<bean id="messageSource"
+		class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>classpath:validation</value>
+			</list>
+		</property>
+	</bean>
+
 	<bean
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="prefix">
@@ -52,6 +61,14 @@
 			</props>
 		</property>
 	</bean>
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3306/steg_hash" />
+		<property name="username" value="steg-hash" />
+		<property name="password" value="steg-hash" />
+	</bean>
+	<bean id="userValidator" class="webapp.validators.UserValidator"></bean>
 	<bean id="validator"
 		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
 	<bean

@@ -9,120 +9,128 @@ import java.util.Map;
 import java.util.Random;
 
 public class HashTagChain {
-
+	/**
+	 * recursion method for generating all permutations of input list of strings
+	 * 
+	 * @param list
+	 * @return list of permutations
+	 */
 	private static List<List<String>> permutationsList(List<String> list) {
 
-	    if (list.size() == 0) {
-	        List<List<String>> result = new ArrayList<List<String>>();
-	        result.add(new ArrayList<String>());
-	        return result;
-	    }
+		if (list.size() == 0) {
+			List<List<String>> result = new ArrayList<List<String>>();
+			result.add(new ArrayList<String>());
+			return result;
+		}
 
-	    List<List<String>> returnThis = new ArrayList<List<String>>();
+		List<List<String>> returnThis = new ArrayList<List<String>>();
 
-	    String firstElement = list.remove(0);
+		String firstElement = list.remove(0);
 
-	    List<List<String>> recursiveReturn = permutationsList(list);
-	    for (List<String> li : recursiveReturn) {
+		List<List<String>> recursiveReturn = permutationsList(list);
+		for (List<String> li : recursiveReturn) {
 
-	        for (int index = 0; index <= li.size(); index++) {
-	            List<String> temp = new ArrayList<String>(li);
-	            temp.add(index, firstElement);
-	            returnThis.add(temp);
-	        }
+			for (int index = 0; index <= li.size(); index++) {
+				List<String> temp = new ArrayList<String>(li);
+				temp.add(index, firstElement);
+				returnThis.add(temp);
+			}
 
-	    }
-	    return returnThis;
+		}
+		return returnThis;
 	}
-	
-	private static Map<Integer, List<String>> getChain(List<List<String>> permutations){
+
+	/**
+	 * generating chain of <key,value> pair which contains address as a key and
+	 * permutation of hashtags as a value
+	 * 
+	 * @param permutations
+	 * @return
+	 */
+	private static Map<Integer, List<String>> getChain(List<List<String>> permutations) {
 		Map<Integer, List<String>> result = new LinkedHashMap<Integer, List<String>>();
 		Map<String, Map<Integer, List<String>>> buckets = new HashMap<String, Map<Integer, List<String>>>();
-		List<String> bucketNames = new ArrayList<String>(); 
+		List<String> bucketNames = new ArrayList<String>();
 		String previousBucket = "";
-		
-		for (int i=0; i< permutations.size(); i++){
-			if(buckets.containsKey(permutations.get(i).get(permutations.get(i).size()-1))){
-				buckets.get(permutations.get(i).get(permutations.get(i).size()-1)).put(i, permutations.get(i));
-			}else{				
+
+		for (int i = 0; i < permutations.size(); i++) {
+			if (buckets.containsKey(permutations.get(i).get(permutations.get(i).size() - 1))) {
+				buckets.get(permutations.get(i).get(permutations.get(i).size() - 1)).put(i, permutations.get(i));
+			} else {
 				Map<Integer, List<String>> tmpMap = new LinkedHashMap<Integer, List<String>>();
 				tmpMap.put(i, permutations.get(i));
-				buckets.put(permutations.get(i).get(permutations.get(i).size()-1), tmpMap);
-				bucketNames.add(permutations.get(i).get(permutations.get(i).size()-1));
+				buckets.put(permutations.get(i).get(permutations.get(i).size() - 1), tmpMap);
+				bucketNames.add(permutations.get(i).get(permutations.get(i).size() - 1));
 			}
 		}
-		
-//		buckets.forEach((a,b) -> {
-//			System.out.println("Bucket: "+ a);
-//			b.forEach((c,d) -> {
-//				System.out.println("Address: "+ c);
-//				d.forEach(System.out::println);
-//			});
-//		});
-		
-		 Random rnd = new Random();
-		
-		while(!bucketNames.isEmpty()){
-			if(previousBucket.equals("")){
-				
+
+		// buckets.forEach((a,b) -> {
+		// System.out.println("Bucket: "+ a);
+		// b.forEach((c,d) -> {
+		// System.out.println("Address: "+ c);
+		// d.forEach(System.out::println);
+		// });
+		// });
+
+		Random rnd = new Random();
+
+		while (!bucketNames.isEmpty()) {
+			if (previousBucket.equals("")) {
+
 				String currentBucket = bucketNames.get(rnd.nextInt(bucketNames.size()));
 				Map<Integer, List<String>> pseudorandomBucket = buckets.get(currentBucket);
 				List<Integer> addressesFromCurrentBucket = new ArrayList<Integer>();
-				pseudorandomBucket.forEach((a,b)-> addressesFromCurrentBucket.add(a));
-				int currentAddress  = addressesFromCurrentBucket.get(rnd.nextInt( addressesFromCurrentBucket.size()));
+				pseudorandomBucket.forEach((a, b) -> addressesFromCurrentBucket.add(a));
+				int currentAddress = addressesFromCurrentBucket.get(rnd.nextInt(addressesFromCurrentBucket.size()));
 				result.put(currentAddress, buckets.get(currentBucket).remove(currentAddress));
-				if(buckets.get(currentBucket).isEmpty()){
+				if (buckets.get(currentBucket).isEmpty()) {
 					bucketNames.remove(currentBucket);
 					previousBucket = "";
-				}else{
-					if(bucketNames.size() != 1){
+				} else {
+					if (bucketNames.size() != 1) {
 						bucketNames.remove(currentBucket);
 						previousBucket = currentBucket;
-					}else{
+					} else {
 						previousBucket = "";
 					}
-					
+
 				}
-				
-			}else{
+
+			} else {
 				String currentBucket = bucketNames.get(rnd.nextInt(bucketNames.size()));
 				bucketNames.add(previousBucket);
 				Map<Integer, List<String>> pseudorandomBucket = buckets.get(currentBucket);
 				List<Integer> addressesFromCurrentBucket = new ArrayList<Integer>();
-				pseudorandomBucket.forEach((a,b)-> addressesFromCurrentBucket.add(a));
-				int currentAddress  = addressesFromCurrentBucket.get(rnd.nextInt( addressesFromCurrentBucket.size()));
+				pseudorandomBucket.forEach((a, b) -> addressesFromCurrentBucket.add(a));
+				int currentAddress = addressesFromCurrentBucket.get(rnd.nextInt(addressesFromCurrentBucket.size()));
 				result.put(currentAddress, buckets.get(currentBucket).remove(currentAddress));
-				if(buckets.get(currentBucket).isEmpty()){
+				if (buckets.get(currentBucket).isEmpty()) {
 					bucketNames.remove(currentBucket);
 					previousBucket = "";
-				}else{
+				} else {
 					bucketNames.remove(currentBucket);
 					previousBucket = currentBucket;
 				}
-				
+
 			}
-			
+
 		}
-		
-		
+
 		return result;
 	}
-	
 
-	public static Map<Integer, List<String>> generateChainOfHashtags(List<String> list){
+	public static Map<Integer, List<String>> generateChainOfHashtags(List<String> list) {
 		return getChain(permutationsList(list));
 	}
 
-	
 	public static void main(String[] args) {
-		
+
 		List<String> test = new ArrayList<String>(Arrays.asList("#Warsaw", "#home", "#Poland", "#test123"));
 		Map<Integer, List<String>> resultChain = generateChainOfHashtags(test);
-		resultChain.forEach((a,b)->{
+		resultChain.forEach((a, b) -> {
 			System.out.println("Address: " + a);
 			b.forEach(System.out::println);
 		});
-
 
 	}
 

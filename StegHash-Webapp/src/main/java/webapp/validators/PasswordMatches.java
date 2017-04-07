@@ -1,4 +1,4 @@
-package webapp.dto;
+package webapp.validators;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
