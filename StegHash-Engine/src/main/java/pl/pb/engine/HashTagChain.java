@@ -1,4 +1,4 @@
-package engine;
+package pl.pb.engine;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -131,6 +131,7 @@ public class HashTagChain {
 			System.out.println("Address: " + a);
 			b.forEach(System.out::println);
 		});
+
 
 	}
 

@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>PatrykBak</groupId>
+	<groupId>pl.pb</groupId>
 	<artifactId>StegHash</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
@@ -20,7 +20,8 @@
 	</build>
 	<modules>
 		<module>StegHash-Engine</module>
-		<module>PatrykBak.StegHash-Webapp</module>
-		<module>PatrykBak.StegHash-Model</module>
+		<module>StegHash-Model</module>
+		<module>StegHash-Webapp</module>
+		<module>StegHash-WebappBoot</module>
 	</modules>
 </project>

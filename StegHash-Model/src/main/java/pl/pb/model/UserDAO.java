@@ -1,4 +1,4 @@
-package webapp.model;
+package pl.pb.model;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
