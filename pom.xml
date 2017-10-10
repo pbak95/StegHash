@@ -21,7 +21,6 @@
 	<modules>
 		<module>StegHash-Engine</module>
 		<module>StegHash-Model</module>
-		<module>StegHash-Webapp</module>
 		<module>StegHash-WebappBoot</module>
 	</modules>
 </project>
