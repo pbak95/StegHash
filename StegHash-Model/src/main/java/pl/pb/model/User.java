@@ -1,30 +1,36 @@
 package pl.pb.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
+
 
 @Entity
-@Table(name="users")
+@Table(name="USERS")
 public class User {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id", nullable = false)
+	@Column(name = "USER_ID", nullable = false)
 	private long id;
-	@Column(name = "username",nullable = false)
+	@Column(name = "USERNAME",nullable = false)
     private String username;
-	@Column(name = "password", nullable = false)
+	@Column(name = "PASSWORD", nullable = false)
     private String password;
-	@Column(name = "role", nullable = false)
+	@Column(name = "ROLE", nullable = false)
     private String role;
-	@Column(name = "enabled", nullable = false)
+	@Column(name = "ENABLED", nullable = false)
 	private int enabled;
-	@Column(name = "email", nullable = false)
+	@Column(name = "EMAIL", nullable = false)
 	private String email;
+	@JsonBackReference
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+	private Set<TwitterAccount> twitterAccountSet = new HashSet<>();
+	@JsonBackReference
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+	private Set<FlickrAccount> flickrAccountSet = new HashSet<>();
 	
 	public long getId() {
 		return id;
@@ -59,5 +65,20 @@ public class User {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	
+
+	public Set<TwitterAccount> getTwitterAccountSet() {
+		return twitterAccountSet;
+	}
+
+	public void setTwitterAccountSet(Set<TwitterAccount> twitterAccountSet) {
+		this.twitterAccountSet = twitterAccountSet;
+	}
+
+	public Set<FlickrAccount> getFlickrAccountSet() {
+		return flickrAccountSet;
+	}
+
+	public void setFlickrAccountSet(Set<FlickrAccount> flickrAccountSet) {
+		this.flickrAccountSet = flickrAccountSet;
+	}
 }

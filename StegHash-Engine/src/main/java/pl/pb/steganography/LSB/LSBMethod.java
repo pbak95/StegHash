@@ -18,8 +18,7 @@ public class LSBMethod {
         return arr;
     }
 
-    public static void setMessage(String name , String message) throws Exception {
-        BufferedImage image = ImageUtility.fetchImage(name);
+    public static void setMessage(BufferedImage image , String message, String name) throws Exception {
         byte[] messageInBytes = getBytes(message);
         int capacity = PropertiesUtility.getInstance().getIntegerProperty("capacity");
         if (capacity == -1) {
@@ -28,11 +27,12 @@ public class LSBMethod {
         System.out.println("Size: " + image.getWidth() + " x " + image.getHeight());
         LSBMethod.setMessageLength(image, messageInBytes.length, capacity);
         encodeBytesInPixels(image,messageInBytes,capacity * 8); //capacity - number of bytes, multiplied by 8 due to only lsb is used to store data
-        String[] baseName = name.split("\\.");
-        String steganogramName = baseName[0] + "_steg." + baseName[1];
-        System.out.println(steganogramName);
-        ImageUtility.saveImage(image,steganogramName);
-
+        if (name != null) {
+            String[] baseName = name.split("\\.");
+            String steganogramName = baseName[0] + "_steg." + baseName[1];
+            System.out.println(steganogramName);
+            ImageUtility.saveImage(image, steganogramName);
+        }
     }
 
     private static void setMessageLength(BufferedImage image, int length, int capacity) throws Exception {
@@ -78,8 +78,8 @@ public class LSBMethod {
         }
     }
 
-    public static String getMessage(String name) throws Exception {
-        BufferedImage image = ImageUtility.fetchSteganogram(name);
+    public static String getMessage(BufferedImage image) throws Exception {
+        //BufferedImage image = ImageUtility.fetchSteganogram(name);
         int capacity = PropertiesUtility.getInstance().getIntegerProperty("capacity");
         if (capacity == -1) {
             throw new Exception("Bad format of capacity parameter!");
@@ -120,7 +120,5 @@ public class LSBMethod {
         }
         return hiddenBytes;
     }
-
-
 }
 

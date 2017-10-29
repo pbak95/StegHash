@@ -1,12 +1,10 @@
 package pl.pb.utils;
 
 
-
-
-import java.util.Properties;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Properties;
 
 /**
  * Created by Patryk on 2017-10-08.
@@ -15,7 +13,7 @@ public class PropertiesUtility {
 
     private final Properties properties = new Properties();
 
-    private PropertiesUtility () {
+    private PropertiesUtility() {
         InputStream input = null;
         try {
             String[] path = this.getClass().getClassLoader().getResource("").getPath().split("/");
