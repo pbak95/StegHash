@@ -9,7 +9,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name="TWITTER_ACCOUNTS")
-public class TwitterAccount {
+public class TwitterAccount extends OSNAccount{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,13 +33,46 @@ public class TwitterAccount {
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 
+    @Override
     public long getId() {
         return id;
     }
 
+    @Override
     public void setId(long id) {
         this.id = id;
     }
+
+    @Override
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    @Override
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    @Override
+    public String getAccessSecret() {
+        return accessSecret;
+    }
+
+    @Override
+    public void setAccessSecret(String accessSecret) {
+        this.accessSecret = accessSecret;
+    }
+
+    @Override
+    public User getUser() {
+        return user;
+    }
+
+    @Override
+    public void setUser(User user) {
+        this.user = user;
+    }
+
 
     public String getConsumerKey() {
         return consumerKey;
@@ -57,27 +90,4 @@ public class TwitterAccount {
         this.consumerSecret = consumerSecret;
     }
 
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    public String getAccessSecret() {
-        return accessSecret;
-    }
-
-    public void setAccessSecret(String accessSecret) {
-        this.accessSecret = accessSecret;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
 }

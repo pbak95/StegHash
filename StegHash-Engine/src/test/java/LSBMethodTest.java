@@ -16,9 +16,8 @@ public class LSBMethodTest {
         String result = "";
         try {
             BufferedImage image = ImageUtility.fetchImage("lion.png");
-            LSBMethod.setMessage(image, msg, "lion.png");
-            BufferedImage localSteganogram = ImageUtility.fetchSteganogram("lion_steg.png");
-            result = LSBMethod.getMessage(localSteganogram);
+            BufferedImage steganogram = LSBMethod.setMessage(image, msg);
+            result = LSBMethod.getMessage(steganogram);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

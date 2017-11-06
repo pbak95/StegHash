@@ -33,7 +33,7 @@ public class TestDatabase {
             user.setRole("USER");
             FlickrAccount flickrAccount = new FlickrAccount();
             flickrAccount.setAccessToken("72157688314019393-cf16a913c8441f3d");
-            flickrAccount.setAccessTokenSecret("4e404854da2c5262");
+            flickrAccount.setAccessSecret("4e404854da2c5262");
             flickrAccount.setUser(user);
             Set<FlickrAccount> accoountsSet = new HashSet();
             accoountsSet.add(flickrAccount);

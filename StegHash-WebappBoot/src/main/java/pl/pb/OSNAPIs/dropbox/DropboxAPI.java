@@ -8,9 +8,6 @@ import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.users.FullAccount;
-import pl.pb.OSNAPIs.OSNAPIWrapper;
-import pl.pb.steganography.LSB.LSBMethod;
-import pl.pb.utils.ImageUtility;
 import pl.pb.utils.PropertiesUtility;
 
 import javax.imageio.ImageIO;

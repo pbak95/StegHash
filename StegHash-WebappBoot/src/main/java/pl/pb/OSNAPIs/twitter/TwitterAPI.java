@@ -1,7 +1,6 @@
 package pl.pb.OSNAPIs.twitter;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import pl.pb.OSNAPIs.OSNAPIWrapper;
 import pl.pb.OSNAPIs.dropbox.DropboxAPI;
 import pl.pb.config.StegHashWebappApplicationConfig;
 import twitter4j.*;
@@ -13,10 +12,10 @@ import java.awt.image.BufferedImage;
 /**
  * Created by Patryk on 10/22/2017.
  */
-public class TwitterAPI implements OSNAPIWrapper {
+public class TwitterAPI {
 
     @Autowired
-    StegHashWebappApplicationConfig config;
+    StegHashWebappApplicationConfig stegHashWebappApplicationConfig;
 
     public static void main(String args[]) {
         ConfigurationBuilder cb = new ConfigurationBuilder();
@@ -52,28 +51,29 @@ public class TwitterAPI implements OSNAPIWrapper {
         }
     }
 
-    @Override
-    public void publish(BufferedImage image, String description, String format) throws Exception {
-        DropboxAPI dbxAPI = config.getDropboxAPI();
+    public void publish(BufferedImage image, String description, String format,
+                        String consumerToken, String consumerTokenSecret,
+                        String accessToken, String accessTokenSecret) throws Exception {
+        DropboxAPI dbxAPI = stegHashWebappApplicationConfig.dropboxAPI();
         String pathToImage = dbxAPI.upload(image,description,format);
         String tweetMessage = description + "\n" + pathToImage;
-        Status status = this.getTwitterInstance().updateStatus(tweetMessage);
+        Status status = this.getTwitterInstance(consumerToken, consumerTokenSecret,
+                accessToken, accessTokenSecret).updateStatus(tweetMessage);
         //debug
         System.out.println("Successfully updated the status to [" + status.getText() + "].");
     }
 
-    private Twitter getTwitterInstance() {
+    private Twitter getTwitterInstance(String consumerToken, String consumerTokenSecret,
+                                       String accessToken, String accessTokenSecret) {
         ConfigurationBuilder cb = new ConfigurationBuilder();
         cb.setDebugEnabled(false);
         TwitterFactory tf = new TwitterFactory(cb.build());
         Twitter twitter = tf.getInstance();
 
-        //GET this properties from USER
         // Twitter Consumer key & Consumer Secret
-        twitter.setOAuthConsumer("R6xZsRTF9wmqwZGoAdytHN5U3", "OJAb8F1FUj1rjuwhhiahA6hKIXf4oyEp17a7oI0LEX34d0iyhQ");
+        twitter.setOAuthConsumer(consumerToken, consumerTokenSecret);
         // Twitter Access token & Access token Secret
-        twitter.setOAuthAccessToken(new AccessToken("922092323294580742-CIMeCwx93S4SYCYDb9aGqngjvgQhsFn",
-                "UdVicIeLD8Db5pxkgND6fW2XQmsgqqikQmGRCRShwtjxW"));
+        twitter.setOAuthAccessToken(new AccessToken(accessToken, accessTokenSecret));
         return twitter;
     }
 }

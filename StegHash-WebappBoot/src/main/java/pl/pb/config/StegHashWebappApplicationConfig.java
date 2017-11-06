@@ -2,11 +2,12 @@ package pl.pb.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import pl.pb.OSNAPIs.OSNHolder;
-import pl.pb.OSNAPIs.OSNHolderImpl;
+import pl.pb.OSNAPIs.OSNAPIUtilityImpl;
 import pl.pb.OSNAPIs.dropbox.DropboxAPI;
-import pl.pb.services.StegPublisherService;
-import pl.pb.services.StegPublisherServiceImpl;
+import pl.pb.OSNAPIs.flickr.FlickrAPI;
+import pl.pb.OSNAPIs.twitter.TwitterAPI;
+import pl.pb.rest.StegPublisherResource;
+import pl.pb.rest.StegPublisherResourceImpl;
 
 /**
  * Created by Patryk on 10/18/2017.
@@ -15,17 +16,27 @@ import pl.pb.services.StegPublisherServiceImpl;
 public class StegHashWebappApplicationConfig {
 
     @Bean
-    public StegPublisherService getStegPublisherService() {
-        return new StegPublisherServiceImpl();
+    public StegPublisherResource stegPublisherResource() {
+        return new StegPublisherResourceImpl();
     }
 
     @Bean
-    public OSNHolder getOSNHolder() {
-        return new OSNHolderImpl();
-    }
-
-    @Bean
-    public DropboxAPI getDropboxAPI() {
+    public DropboxAPI dropboxAPI() {
         return new DropboxAPI();
+    }
+
+    @Bean
+    public TwitterAPI twitterAPI() {
+        return new TwitterAPI();
+    }
+
+    @Bean
+    public FlickrAPI flickrAPI() {
+        return new FlickrAPI();
+    }
+
+    @Bean
+    public OSNAPIUtilityImpl osnapiUtility() {
+        return new OSNAPIUtilityImpl();
     }
 }

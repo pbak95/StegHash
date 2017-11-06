@@ -7,17 +7,10 @@ import com.flickr4java.flickr.RequestContext;
 import com.flickr4java.flickr.auth.Auth;
 import com.flickr4java.flickr.auth.AuthInterface;
 import com.flickr4java.flickr.auth.Permission;
-import com.flickr4java.flickr.photos.Photo;
-import com.flickr4java.flickr.photos.PhotoList;
-import com.flickr4java.flickr.photos.PhotosInterface;
-import com.flickr4java.flickr.photos.SearchParameters;
-import com.flickr4java.flickr.test.TestInterface;
 import com.flickr4java.flickr.uploader.UploadMetaData;
 import com.flickr4java.flickr.uploader.Uploader;
 import com.flickr4java.flickr.util.AuthStore;
 import org.scribe.model.Token;
-import org.scribe.model.Verifier;
-import pl.pb.OSNAPIs.OSNAPIWrapper;
 import pl.pb.utils.PropertiesUtility;
 
 import javax.imageio.ImageIO;
@@ -28,7 +21,7 @@ import java.util.*;
 /**
  * Created by Patryk on 10/23/2017.
  */
-public class FlickrAPI implements OSNAPIWrapper{
+public class FlickrAPI {
 
     private Flickr flickr;
 
@@ -42,8 +35,8 @@ public class FlickrAPI implements OSNAPIWrapper{
     }
 
 
-    @Override
-    public void publish(BufferedImage image, String description, String format) throws Exception {
+    public void publish(BufferedImage image, String description, String format,
+                        String accessToken, String accessTokenSecret) throws Exception {
         Uploader uploader = flickr.getUploader();
         AuthInterface authInterface = flickr.getAuthInterface();
 
@@ -61,7 +54,7 @@ public class FlickrAPI implements OSNAPIWrapper{
         hashtagsList.forEach(s -> s.replace("#",""));
         metaData.setTags(Arrays.asList(hashtags));
         //TO_DO get this parameters for requested user
-        Token tokenReused = new Token("72157688314019393-cf16a913c8441f3d", "4e404854da2c5262");
+        Token tokenReused = new Token(accessToken, accessTokenSecret);
         Auth auth = authInterface.checkToken(tokenReused);
         RequestContext.getRequestContext().setAuth(auth);
         System.out.println("Authentication success");

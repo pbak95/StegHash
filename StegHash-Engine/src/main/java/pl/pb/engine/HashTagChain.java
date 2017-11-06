@@ -120,7 +120,9 @@ public class HashTagChain {
 	}
 
 	public static Map<Integer, List<String>> generateChainOfHashtags(List<String> list) {
-		return getChain(permutationsList(list));
+		List<String> listTmp = new ArrayList<>();
+		list.forEach(hashtag -> listTmp.add(hashtag));
+		return getChain(permutationsList(listTmp));
 	}
 
 	public static void main(String[] args) {
@@ -131,6 +133,9 @@ public class HashTagChain {
 			System.out.println("Address: " + a);
 			b.forEach(System.out::println);
 		});
+
+		System.out.println("Values: ");
+		resultChain.values().forEach( perm -> System.out.println(perm));
 
 
 	}

@@ -9,10 +9,10 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name="FLICKR_ACCOUNTS")
-public class FlickrAccount {
+public class FlickrAccount extends  OSNAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "TWITTER_ACCOUNT_ID", nullable = false)
+    @Column(name = "FLICKR_ACCOUNT_ID", nullable = false)
     private long id;
 
 
@@ -20,41 +20,49 @@ public class FlickrAccount {
     private String accessToken;
 
     @Column(name = "ACCESS_TOKEN_SECRET", nullable = false)
-    private String accessTokenSecret;
+    private String accessSecret;
 
     @JsonManagedReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 
+    @Override
     public long getId() {
         return id;
     }
 
+    @Override
     public void setId(long id) {
         this.id = id;
     }
 
+    @Override
     public String getAccessToken() {
         return accessToken;
     }
 
+    @Override
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
     }
 
-    public String getAccessTokenSecret() {
-        return accessTokenSecret;
+    @Override
+    public String getAccessSecret() {
+        return accessSecret;
     }
 
-    public void setAccessTokenSecret(String accessTokenSecret) {
-        this.accessTokenSecret = accessTokenSecret;
+    @Override
+    public void setAccessSecret(String accessSecret) {
+        this.accessSecret = accessSecret;
     }
 
+    @Override
     public User getUser() {
         return user;
     }
 
+    @Override
     public void setUser(User user) {
         this.user = user;
     }

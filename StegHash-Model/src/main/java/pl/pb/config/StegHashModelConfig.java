@@ -9,6 +9,9 @@ import oracle.jdbc.pool.OracleDataSource;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import pl.pb.model.FlickrAccountDAO;
+import pl.pb.model.TwitterAccountDAO;
+import pl.pb.model.UserDAO;
 import pl.pb.utils.PropertiesUtility;
 
 import javax.sql.DataSource;
@@ -60,12 +63,26 @@ public class StegHashModelConfig {
     }
 
 
-
     @Bean
     @Autowired
     public HibernateTransactionManager transactionManager(SessionFactory sessionFactory){
         HibernateTransactionManager transactionManager = new HibernateTransactionManager();
         transactionManager.setSessionFactory(sessionFactory);
         return transactionManager;
+    }
+
+    @Bean
+    public FlickrAccountDAO flickrAccountDAO() {
+        return new FlickrAccountDAO();
+    }
+
+    @Bean
+    public TwitterAccountDAO twitterAccountDAO() {
+        return new TwitterAccountDAO();
+    }
+
+    @Bean
+    public UserDAO userDAO() {
+        return new UserDAO();
     }
 }

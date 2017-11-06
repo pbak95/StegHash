@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Created by Patryk on 10/29/2017.
  */
-@Repository
 @EnableTransactionManagement
 public class FlickrAccountDAO {
 

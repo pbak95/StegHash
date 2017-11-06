@@ -18,7 +18,7 @@ public class LSBMethod {
         return arr;
     }
 
-    public static void setMessage(BufferedImage image , String message, String name) throws Exception {
+    public static BufferedImage setMessage(BufferedImage image , String message) throws Exception {  // <- String name
         byte[] messageInBytes = getBytes(message);
         int capacity = PropertiesUtility.getInstance().getIntegerProperty("capacity");
         if (capacity == -1) {
@@ -27,12 +27,13 @@ public class LSBMethod {
         System.out.println("Size: " + image.getWidth() + " x " + image.getHeight());
         LSBMethod.setMessageLength(image, messageInBytes.length, capacity);
         encodeBytesInPixels(image,messageInBytes,capacity * 8); //capacity - number of bytes, multiplied by 8 due to only lsb is used to store data
-        if (name != null) {
-            String[] baseName = name.split("\\.");
-            String steganogramName = baseName[0] + "_steg." + baseName[1];
-            System.out.println(steganogramName);
-            ImageUtility.saveImage(image, steganogramName);
-        }
+//        if (name != null) {
+//            String[] baseName = name.split("\\.");
+//            String steganogramName = baseName[0] + "_steg." + baseName[1];
+//            System.out.println(steganogramName);
+//            ImageUtility.saveImage(image, steganogramName);
+//        }
+        return image;
     }
 
     private static void setMessageLength(BufferedImage image, int length, int capacity) throws Exception {
