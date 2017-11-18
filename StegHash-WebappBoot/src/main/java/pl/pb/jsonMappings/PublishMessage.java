@@ -1,7 +1,6 @@
-package pl.pb.entities;
+package pl.pb.jsonMappings;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * Created by Patryk on 11/6/2017.
@@ -10,7 +9,7 @@ public class PublishMessage implements Serializable {
 
     private String from;
 
-    private String to;
+    private String[] to;
 
     private String message;
 
@@ -26,11 +25,11 @@ public class PublishMessage implements Serializable {
         this.from = from;
     }
 
-    public String getTo() {
+    public String[] getTo() {
         return to;
     }
 
-    public void setTo(String to) {
+    public void setTo(String[] to) {
         this.to = to;
     }
 

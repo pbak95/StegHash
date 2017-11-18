@@ -1,7 +1,9 @@
 package pl.pb.OSNAPIs;
 
 import pl.pb.exceptions.DataConsistencyException;
+import pl.pb.model.OSNAPI;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -9,7 +11,7 @@ import java.util.Map;
  */
 public interface OSNAPIUtility {
 
-    Map<OSNAPI, Boolean> checkAvailableAccounts(String username1, String username2) throws DataConsistencyException;
+    Map<OSNAPI, Boolean> checkAvailableAccounts(String fromUser, List<String> toUser2) throws DataConsistencyException;
 }
 
 

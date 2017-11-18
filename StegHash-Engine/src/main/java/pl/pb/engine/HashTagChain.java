@@ -138,6 +138,8 @@ public class HashTagChain {
 		resultChain.values().forEach( perm -> System.out.println(perm));
 
 
+
+
 	}
 
 }

@@ -9,9 +9,7 @@ import oracle.jdbc.pool.OracleDataSource;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import pl.pb.model.FlickrAccountDAO;
-import pl.pb.model.TwitterAccountDAO;
-import pl.pb.model.UserDAO;
+import pl.pb.database_access.*;
 import pl.pb.utils.PropertiesUtility;
 
 import javax.sql.DataSource;
@@ -85,4 +83,30 @@ public class StegHashModelConfig {
     public UserDAO userDAO() {
         return new UserDAO();
     }
+
+    @Bean
+    public HashtagPermutationDAO hashtagPermutationDAO() {
+        return new HashtagPermutationDAO();
+    }
+
+    @Bean
+    public MessageDAO messageDAO() {
+        return new MessageDAO();
+    }
+
+    @Bean
+    public OSNMappingDAO osnMappingDAO() {
+        return new OSNMappingDAO();
+    }
+
+    @Bean
+    public MessagePublisher messagePublisher() {
+        return new MessagePublisher();
+    }
+
+    @Bean
+    public MessageReader messageReader() {
+        return new MessageReader();
+    }
+
 }

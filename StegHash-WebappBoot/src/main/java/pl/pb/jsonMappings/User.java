@@ -1,4 +1,4 @@
-package pl.pb.entities;
+package pl.pb.jsonMappings;
 
 import java.io.Serializable;
 

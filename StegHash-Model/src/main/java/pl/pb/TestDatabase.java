@@ -4,9 +4,9 @@ package pl.pb;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import pl.pb.config.StegHashModelConfig;
 import pl.pb.model.FlickrAccount;
-import pl.pb.model.FlickrAccountDAO;
+import pl.pb.database_access.FlickrAccountDAO;
 import pl.pb.model.User;
-import pl.pb.model.UserDAO;
+import pl.pb.database_access.UserDAO;
 
 import java.util.HashSet;
 import java.util.Set;

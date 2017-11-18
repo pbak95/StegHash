@@ -1,7 +1,7 @@
 package pl.pb.rest;
 
 
-import pl.pb.entities.PublishMessage;
+import pl.pb.jsonMappings.PublishMessage;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

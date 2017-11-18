@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import pl.pb.entities.User;
+import pl.pb.jsonMappings.User;
 
 @RestController
 public class UserController {

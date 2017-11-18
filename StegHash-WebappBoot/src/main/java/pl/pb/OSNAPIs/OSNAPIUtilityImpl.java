@@ -1,10 +1,14 @@
 package pl.pb.OSNAPIs;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import pl.pb.config.StegHashModelConfig;
+import pl.pb.database_access.UserDAO;
 import pl.pb.exceptions.DataConsistencyException;
+import pl.pb.model.OSNAPI;
 import pl.pb.model.User;
-import pl.pb.model.UserRepository;
+import pl.pb.database_access.UserRepository;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,15 +19,19 @@ import java.util.Map;
 public class OSNAPIUtilityImpl implements OSNAPIUtility{
 
     @Autowired
-    private UserRepository userRepository;
+    private StegHashModelConfig stegHashModelConfig;
 
     @Override
-    public Map<OSNAPI, Boolean> checkAvailableAccounts(String fromUser, String toUser) throws DataConsistencyException {
+    public Map<OSNAPI, Boolean> checkAvailableAccounts(String fromUser, List<String> toUser) throws DataConsistencyException {
         Map<OSNAPI, Boolean> availableAccounts = new HashMap<>();
 
-        Map<OSNAPI, Boolean> fromAccounts = getAccountsForUser(fromUser);
-        Map<OSNAPI, Boolean> toAccounts = getAccountsForUser(toUser);
-
+        UserDAO userDAO = stegHashModelConfig.userDAO();
+        Map<OSNAPI, Boolean> fromAccounts = userDAO.getAccountsForUser(fromUser);
+        List<Map<OSNAPI, Boolean>> toUsersAvailableAPIs = new ArrayList<>();
+        for (String username : toUser) {
+            toUsersAvailableAPIs.add(userDAO.getAccountsForUser(username));
+        }
+        Map<OSNAPI, Boolean> toAccounts = getMapWithTheLowestNumberOfAccounts(toUsersAvailableAPIs);
         toAccounts.forEach((toApi,toApiCheck) -> {
             if (fromAccounts.get(toApi) == toApiCheck == true) {
                 availableAccounts.put(toApi,toApiCheck);
@@ -33,29 +41,13 @@ public class OSNAPIUtilityImpl implements OSNAPIUtility{
         return availableAccounts;
     }
 
-    private Map<OSNAPI, Boolean> getAccountsForUser(String username) throws DataConsistencyException {
-        Map<OSNAPI, Boolean> accountsMap = new HashMap<>();
-        List<User> users = userRepository.findByUsername(username);
-
-        if (users.size() > 1) {
-            throw new DataConsistencyException("Multiple result for this username!");
-        } else if (users.isEmpty()) {
-            return accountsMap;
+    private Map<OSNAPI, Boolean> getMapWithTheLowestNumberOfAccounts(List<Map<OSNAPI, Boolean>> toUsersAvailableAPIs) {
+        Map<OSNAPI, Boolean> result = toUsersAvailableAPIs.get(0);
+        for (Map<OSNAPI, Boolean> map : toUsersAvailableAPIs) {
+            if (map.size() < result.size()) {
+                result = map;
+            }
         }
-
-        User user = users.get(0);
-
-        if (user.getTwitterAccountSet().size() > 0) {
-            accountsMap.put(OSNAPI.TWITTER, true);
-        } else {
-            accountsMap.put(OSNAPI.TWITTER, false);
-        }
-
-        if (user.getFlickrAccountSet().size() > 0) {
-            accountsMap.put(OSNAPI.FLICKR, true);
-        } else {
-            accountsMap.put(OSNAPI.FLICKR, false);
-        }
-        return accountsMap;
+        return result;
     }
 }

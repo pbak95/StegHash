@@ -1,6 +1,6 @@
 package pl.pb.steganography.LSB;
 
-import pl.pb.utils.ImageUtility;
+import org.omg.CORBA.MARSHAL;
 import pl.pb.utils.PropertiesUtility;
 
 import java.awt.Color;
@@ -13,20 +13,22 @@ import java.nio.charset.Charset;
  */
 public class LSBMethod {
 
-    private static byte[] getBytes(String s){
-        byte [] arr = s.getBytes(Charset.forName("UTF-8"));
-        return arr;
-    }
+    private static String MAKRUP = "~#<";
 
-    public static BufferedImage setMessage(BufferedImage image , String message) throws Exception {  // <- String name
-        byte[] messageInBytes = getBytes(message);
+    public static BufferedImage setMessage(BufferedImage image , String message, int permutationNumber) throws Exception {  // <- String name
+        byte[] messageInBytes = getBytes(addStartMarkup(message));
         int capacity = PropertiesUtility.getInstance().getIntegerProperty("capacity");
+        int permutationNumberLength = PropertiesUtility.getInstance().getIntegerProperty("permutationNumberLength");
         if (capacity == -1) {
             throw new Exception("Bad format of capacity parameter!");
         }
         System.out.println("Size: " + image.getWidth() + " x " + image.getHeight());
-        LSBMethod.setMessageLength(image, messageInBytes.length, capacity);
-        encodeBytesInPixels(image,messageInBytes,capacity * 8); //capacity - number of bytes, multiplied by 8 due to only lsb is used to store data
+        //set number of bytes with message length
+        LSBMethod.setMessageParam(image, messageInBytes.length, capacity, 0);
+        //set permutation number
+        LSBMethod.setMessageParam(image, permutationNumber, permutationNumberLength, capacity * 8);
+        //used number of bytes, multiplied by 8 due to only least significant bit is used to store data
+        encodeBytesInPixels(image,messageInBytes,(capacity + permutationNumberLength) * 8);
 //        if (name != null) {
 //            String[] baseName = name.split("\\.");
 //            String steganogramName = baseName[0] + "_steg." + baseName[1];
@@ -36,19 +38,19 @@ public class LSBMethod {
         return image;
     }
 
-    private static void setMessageLength(BufferedImage image, int length, int capacity) throws Exception {
-        String lengthStr = String.valueOf(length);
-        byte[] lengthInBytes = getBytes(lengthStr);
-        if (lengthInBytes.length < capacity) {
-            byte[] emptyArr = new byte [capacity - lengthInBytes.length];
-            byte[] tmp = lengthInBytes;
-            lengthInBytes = new byte [tmp.length + emptyArr.length];
-            System.arraycopy(emptyArr, 0, lengthInBytes, 0, emptyArr.length);
-            System.arraycopy(tmp, 0, lengthInBytes, emptyArr.length, tmp.length);
-        } else if (lengthInBytes.length > capacity) {
+    private static void setMessageParam(BufferedImage image, int param, int paramSize, int offset) throws Exception {
+        String lengthStr = String.valueOf(param);
+        byte[] paramInBytes = getBytes(lengthStr);
+        if (paramInBytes.length <= paramSize) {
+            byte[] emptyArr = new byte [paramSize - paramInBytes.length];
+            byte[] tmp = paramInBytes;
+            paramInBytes = new byte [tmp.length + emptyArr.length];
+            System.arraycopy(emptyArr, 0, paramInBytes, 0, emptyArr.length);
+            System.arraycopy(tmp, 0, paramInBytes, emptyArr.length, tmp.length);
+        } else if (paramInBytes.length > paramSize) {
             throw new Exception("Capacity is to small!");
         }
-        encodeBytesInPixels(image, lengthInBytes,0);
+        encodeBytesInPixels(image, paramInBytes,offset);
     }
 
     private static void encodeBytesInPixels(BufferedImage image, byte[] data, int offset) throws Exception{
@@ -79,23 +81,30 @@ public class LSBMethod {
         }
     }
 
-    public static String getMessage(BufferedImage image) throws Exception {
+    public static HiddenData getHiddenData(BufferedImage image) throws Exception {
         //BufferedImage image = ImageUtility.fetchSteganogram(name);
         int capacity = PropertiesUtility.getInstance().getIntegerProperty("capacity");
+        int permutationNumberLength = PropertiesUtility.getInstance().getIntegerProperty("permutationNumberLength");
+
         if (capacity == -1) {
             throw new Exception("Bad format of capacity parameter!");
         }
-        int messageLength = getMessageLength(image, capacity);
-        byte [] hiddenBytes = decodeBytesFromPixels(image, messageLength,capacity * 8);
-        return new String(hiddenBytes);
+        int messageLength = getMessageParam(image, capacity,0);
+        int permutationNumber = getMessageParam(image, permutationNumberLength, capacity * 8);
+        byte [] hiddenBytes = decodeBytesFromPixels(image, messageLength,(capacity + permutationNumberLength) * 8);
+        String hiddenMessage = new String(hiddenBytes);
+        if (!hiddenMessage.startsWith(LSBMethod.MAKRUP)) {
+            throw new Exception("Corrupted hidden message.");
+        }
+        return new HiddenData(removeMarkup(hiddenMessage), permutationNumber);
     }
 
-    private static int getMessageLength (BufferedImage image, int capacity) throws Exception {
-        byte [] hiddenBytes = decodeBytesFromPixels(image,capacity, 0);
-        String lengthStr = new String(hiddenBytes,"UTF-8");
-        lengthStr = lengthStr.substring(lengthStr.lastIndexOf(0) + 1);
-        return PropertiesUtility.getInstance().tryParseInt(lengthStr)
-                ? Integer.parseInt(lengthStr) : 0 ;
+    private static int getMessageParam(BufferedImage image, int capacity, int offset) throws Exception {
+        byte [] hiddenBytes = decodeBytesFromPixels(image,capacity, offset);
+        String paramStr = new String(hiddenBytes,"UTF-8");
+        paramStr = paramStr.substring(paramStr.lastIndexOf(0) + 1);
+        return PropertiesUtility.getInstance().tryParseInt(paramStr)
+                ? Integer.parseInt(paramStr) : 0 ;
     }
 
     private static byte[] decodeBytesFromPixels(BufferedImage image, int capacity, int offset) throws Exception {
@@ -120,6 +129,19 @@ public class LSBMethod {
             }
         }
         return hiddenBytes;
+    }
+
+    private static byte[] getBytes(String s){
+        byte [] arr = s.getBytes(Charset.forName("UTF-8"));
+        return arr;
+    }
+
+    private static String addStartMarkup(String message) {
+        return LSBMethod.MAKRUP + message;
+    }
+
+    private static String removeMarkup(String messageWithMarkup) {
+        return messageWithMarkup.substring(LSBMethod.MAKRUP.length());
     }
 }
 

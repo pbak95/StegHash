@@ -349,7 +349,7 @@ public class UploadPhoto {
 
         // Tags are getting mangled by yahoo stripping off the = , '.' and many other punctuation characters
         // and converting to lower case: use the raw tag field to find the real value for checking and
-        // for download.
+        // for downloadBySharableUrl.
         if (setOrigFilenameTag) {
             List<String> tags = new ArrayList<String>();
             String tmp = basefilename;

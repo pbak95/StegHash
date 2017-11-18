@@ -13,6 +13,10 @@ public abstract class OSNAccount {
 
     private String accessSecret;
 
+    private String consumerKey;
+
+    private String consumerSecret;
+
     public long getId() {
         return id;
     }
@@ -43,5 +47,21 @@ public abstract class OSNAccount {
 
     public void setAccessSecret(String accessSecret) {
         this.accessSecret = accessSecret;
+    }
+
+    public String getConsumerKey() {
+        return consumerKey;
+    }
+
+    public void setConsumerKey(String consumerKey) {
+        this.consumerKey = consumerKey;
+    }
+
+    public String getConsumerSecret() {
+        return consumerSecret;
+    }
+
+    public void setConsumerSecret(String consumerSecret) {
+        this.consumerSecret = consumerSecret;
     }
 }

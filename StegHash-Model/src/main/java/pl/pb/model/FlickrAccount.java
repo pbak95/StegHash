@@ -15,6 +15,11 @@ public class FlickrAccount extends  OSNAccount {
     @Column(name = "FLICKR_ACCOUNT_ID", nullable = false)
     private long id;
 
+    @Column(name = "CONSUMER_KEY", nullable = false)
+    private String consumerKey;
+
+    @Column(name = "CONSUMER_SECRET", nullable = false)
+    private String consumerSecret;
 
     @Column(name = "ACCESS_TOKEN", nullable = false)
     private String accessToken;
@@ -65,5 +70,25 @@ public class FlickrAccount extends  OSNAccount {
     @Override
     public void setUser(User user) {
         this.user = user;
+    }
+
+    @Override
+    public String getConsumerKey() {
+        return consumerKey;
+    }
+
+    @Override
+    public void setConsumerKey(String consumerKey) {
+        this.consumerKey = consumerKey;
+    }
+
+    @Override
+    public String getConsumerSecret() {
+        return consumerSecret;
+    }
+
+    @Override
+    public void setConsumerSecret(String consumerSecret) {
+        this.consumerSecret = consumerSecret;
     }
 }

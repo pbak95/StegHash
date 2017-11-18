@@ -1,5 +1,6 @@
 import org.junit.Assert;
 import org.junit.Test;
+import pl.pb.steganography.LSB.HiddenData;
 import pl.pb.steganography.LSB.LSBMethod;
 import pl.pb.utils.ImageUtility;
 
@@ -13,15 +14,17 @@ public class LSBMethodTest {
     @Test
     public void testIfMessageIsHiddenAndRetrieveProperly() {
         String msg = "Simple message7654";
-        String result = "";
+        HiddenData result;
         try {
             BufferedImage image = ImageUtility.fetchImage("lion.png");
-            BufferedImage steganogram = LSBMethod.setMessage(image, msg);
-            result = LSBMethod.getMessage(steganogram);
+            BufferedImage steganogram = LSBMethod.setMessage(image, msg, 23);
+            result = LSBMethod.getHiddenData(steganogram);
+            Assert.assertEquals("Message hidden in picture should be equal: " + msg, msg, result.getMessage());
+            Assert.assertEquals("Hidden permutation number should be equal 23", 23, result.getPermutationNumber());
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        Assert.assertEquals("Message hidden in picture should be equal: " + msg, msg, result);
+
 
     }
 }

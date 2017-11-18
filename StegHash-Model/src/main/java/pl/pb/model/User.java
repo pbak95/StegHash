@@ -1,6 +1,7 @@
 package pl.pb.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -31,6 +32,12 @@ public class User {
 	@JsonBackReference
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
 	private Set<FlickrAccount> flickrAccountSet = new HashSet<>();
+	@JsonBackReference
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "userFrom")
+	private Set<Message> userMessagesSent = new HashSet<>();
+	@JsonBackReference
+	@ManyToMany(mappedBy="usersTo")
+	private Set<Message> userMessagesReceived = new HashSet<>();
 	
 	public long getId() {
 		return id;
@@ -80,5 +87,29 @@ public class User {
 
 	public void setFlickrAccountSet(Set<FlickrAccount> flickrAccountSet) {
 		this.flickrAccountSet = flickrAccountSet;
+	}
+
+	public Set<Message> getUserMessagesSent() {
+		return userMessagesSent;
+	}
+
+	public void addUserMessageSent(Message message) {
+		this.userMessagesSent.add(message);
+	}
+
+	public void setUserMessagesSent(Set<Message> userMessagesSent) {
+		this.userMessagesSent = userMessagesSent;
+	}
+
+	public Set<Message> getUserMessagesReceived() {
+		return userMessagesReceived;
+	}
+
+	public void addUserMessageReceived(Message message) {
+		this.userMessagesReceived.add(message);
+	}
+
+	public void setUserMessagesReceived(Set<Message> userMessagesReceived) {
+		this.userMessagesReceived = userMessagesReceived;
 	}
 }

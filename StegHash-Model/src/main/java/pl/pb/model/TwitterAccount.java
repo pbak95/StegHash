@@ -73,19 +73,22 @@ public class TwitterAccount extends OSNAccount{
         this.user = user;
     }
 
-
+    @Override
     public String getConsumerKey() {
         return consumerKey;
     }
 
+    @Override
     public void setConsumerKey(String consumerKey) {
         this.consumerKey = consumerKey;
     }
 
+    @Override
     public String getConsumerSecret() {
         return consumerSecret;
     }
 
+    @Override
     public void setConsumerSecret(String consumerSecret) {
         this.consumerSecret = consumerSecret;
     }

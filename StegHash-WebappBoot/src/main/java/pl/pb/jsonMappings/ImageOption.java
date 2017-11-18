@@ -1,4 +1,4 @@
-package pl.pb.entities;
+package pl.pb.jsonMappings;
 
 /**
  * Created by Patryk on 11/6/2017.
