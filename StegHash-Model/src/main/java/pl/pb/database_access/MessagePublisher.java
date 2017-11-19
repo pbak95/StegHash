@@ -1,10 +1,10 @@
 package pl.pb.database_access;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import pl.pb.config.StegHashModelConfig;
 import pl.pb.model.*;
+import pl.pb.model.modelHelperEntities.EnqueuedMessage;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -34,7 +34,6 @@ public class MessagePublisher {
         List<User> userTo = userRepository.findByUsername(enqueuedMessage.getUserTo());
 
         Message newMessage = new Message();
-        List<OSNMapping> newOSNMappings = new ArrayList<>();
 
         List<HashtagPermutation> hashtagPermutationsList = new ArrayList<>();
         enqueuedMessage.getPermutations().forEach((number, permutations) -> {
@@ -49,12 +48,9 @@ public class MessagePublisher {
             hashtagPermutationsList.add(newHashtagPermutation);
         });
 
-        enqueuedMessage.getOsnApiMappings().forEach((hashtag, api) -> {
-            OSNMapping newOSNMapping = new OSNMapping();
-            newOSNMapping.setHashtag(hashtag);
-            newOSNMapping.setOsnApi(api);
-            newOSNMapping.setMessage(newMessage);
-            newOSNMappings.add(newOSNMapping);
+        //add reference to message
+        enqueuedMessage.getOsnApiMappings().forEach(mapping -> {
+            mapping.setMessage(newMessage);
         });
 
         newMessage.setMessageDate(getCurrentDate());
@@ -69,7 +65,7 @@ public class MessagePublisher {
         userDAO.updateUser(userFrom);
         userTo.forEach(userToUpdate -> userDAO.updateUser(userToUpdate));
         messageDAO.addMessage(newMessage);
-        newOSNMappings.forEach(mapping -> osnMappingDAO.addOSNMapping(mapping));
+        enqueuedMessage.getOsnApiMappings().forEach(mapping -> osnMappingDAO.addOSNMapping(mapping));
         hashtagPermutationsList.forEach(permutation ->
                 hashtagPermutationDAO.addHashtagPermutation(permutation));
     }

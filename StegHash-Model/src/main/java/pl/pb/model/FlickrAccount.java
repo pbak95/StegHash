@@ -27,6 +27,9 @@ public class FlickrAccount extends  OSNAccount {
     @Column(name = "ACCESS_TOKEN_SECRET", nullable = false)
     private String accessSecret;
 
+    @Column(name = "FLICKR_USER_ID", nullable = true) //change to false
+    private String userId;
+
     @JsonManagedReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = false)
@@ -90,5 +93,13 @@ public class FlickrAccount extends  OSNAccount {
     @Override
     public void setConsumerSecret(String consumerSecret) {
         this.consumerSecret = consumerSecret;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

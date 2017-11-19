@@ -1,10 +1,10 @@
-package pl.pb.model;
+package pl.pb.model.modelHelperEntities;
 
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import pl.pb.model.OSNAPI;
+import pl.pb.model.OSNMapping;
+
+import java.util.*;
 
 /**
  * Created by Patryk on 11/10/2017.
@@ -19,14 +19,14 @@ public class EnqueuedMessage {
 
     private Map<Integer, List<String>> permutations;
 
-    private Map<String, OSNAPI> osnApiMappings;
+    private List<OSNMapping> osnApiMappings;
 
     public EnqueuedMessage(int id, String userFrom, List<String> userTo) {
         this.id = id;
         this.userFrom = userFrom;
         this.userTo = userTo;
         this.permutations = new HashMap<>();
-        this.osnApiMappings = new HashMap<>();
+        this.osnApiMappings = new ArrayList<>();
     }
 
     public int getId() {
@@ -49,12 +49,15 @@ public class EnqueuedMessage {
         this.permutations.put(permNumber, permutation);
     }
 
-    public Map<String, OSNAPI> getOsnApiMappings() {
+    public List<OSNMapping> getOsnApiMappings() {
         return osnApiMappings;
     }
 
     public void addOsnApiMapping(String hashtag, OSNAPI api) {
-        this.osnApiMappings.put(hashtag, api);
+        OSNMapping osnMapping = new OSNMapping();
+        osnMapping.setHashtag(hashtag);
+        osnMapping.setOsnApi(api);
+        this.osnApiMappings.add(osnMapping);
     }
 
     @Override

@@ -70,7 +70,7 @@ public class FlickrAPI {
 
     public List<DownloadedItem> downloadImages(String hashtagPermutationStr, String consumerToken,
                                                String consumerTokenSecret, String accessToken,
-                                               String accessTokenSecret) throws FlickrException {
+                                               String accessTokenSecret, String userOwnerId) throws FlickrException {
         Flickr flickr = getFlickrInstance(consumerToken, consumerTokenSecret);
         PhotosInterface photosInterface = flickr.getPhotosInterface();
         List<DownloadedItem> downloadedItems = new ArrayList<>();
@@ -83,7 +83,8 @@ public class FlickrAPI {
 
             SearchParameters searchParameters = new SearchParameters();
             searchParameters.setTags(getTagsArrayFromString(hashtagPermutationStr));
-            PhotoList<Photo> photoList = photosInterface.search(searchParameters, 1, 1);
+            searchParameters.setUserId(userOwnerId);
+            PhotoList<Photo> photoList = photosInterface.search(searchParameters, 10, 1);
             PhotoList<Photo> originalPhotos = getOriginalPhotos(photoList, photosInterface,
                     tokenReused.getSecret());
 
@@ -169,55 +170,52 @@ public class FlickrAPI {
         try {
             AuthInterface authInterface = flickr.getAuthInterface();
 
-            Scanner scanner = new Scanner(System.in);
-
-            Token requestToken = authInterface.getRequestToken();
-            System.out.println("token: " + requestToken);
-            String url = authInterface.getAuthorizationUrl(requestToken, Permission.WRITE);
-            System.out.println("Follow this URL to authorise yourself on Flickr");
-            System.out.println(url);
-            System.out.println("Paste in the token it gives you:");
-            System.out.print(">>");
-
-            String tokenKey = scanner.nextLine();
-            scanner.close();
-
-
-
-
-            Token accessToken = authInterface.getAccessToken(requestToken, new Verifier(tokenKey));
-
-            Token tokenReused = new Token(accessToken.getToken(), accessToken.getSecret());
-
-            Auth auth = authInterface.checkToken(accessToken);
-            RequestContext.getRequestContext().setAuth(auth);
-            System.out.println("Authentication success");
-
-            // This token can be used until the user revokes it.
-            System.out.println("Token: " + accessToken.getToken());
-            System.out.println("Secret: " + accessToken.getSecret());
-            System.out.println("nsid: " + auth.getUser().getId());
-            System.out.println("Realname: " + auth.getUser().getRealName());
-            System.out.println("Username: " + auth.getUser().getUsername());
-            System.out.println("Permission: " + auth.getPermission().getType());
-
-
-//            Token tokenReused = new Token("72157688314019393-cf16a913c8441f3d",
-//                    "4e404854da2c5262");
+//            Scanner scanner = new Scanner(System.in);
+//
+//            Token requestToken = authInterface.getRequestToken();
+//            System.out.println("token: " + requestToken);
+//            String url = authInterface.getAuthorizationUrl(requestToken, Permission.WRITE);
+//            System.out.println("Follow this URL to authorise yourself on Flickr");
+//            System.out.println(url);
+//            System.out.println("Paste in the token it gives you:");
+//            System.out.print(">>");
+//
+//            String tokenKey = scanner.nextLine();
+//            scanner.close();
 //
 //
 //
-//            Auth auth = authInterface.checkToken(tokenReused);
+//
+//            Token accessToken = authInterface.getAccessToken(requestToken, new Verifier(tokenKey));
+//
+//            Token tokenReused = new Token(accessToken.getToken(), accessToken.getSecret());
+//
+//            Auth auth = authInterface.checkToken(accessToken);
 //            RequestContext.getRequestContext().setAuth(auth);
 //            System.out.println("Authentication success");
+//
+//            // This token can be used until the user revokes it.
+//            System.out.println("Token: " + accessToken.getToken());
+//            System.out.println("Secret: " + accessToken.getSecret());
+//            System.out.println("nsid: " + auth.getUser().getId());
+//            System.out.println("Realname: " + auth.getUser().getRealName());
+//            System.out.println("Username: " + auth.getUser().getUsername());
+//            System.out.println("Permission: " + auth.getPermission().getType());
+
+
+            Token tokenReused = new Token("72157689739289005-32747b62351f4b66",
+                    "7da3802635a9b4b3");
+
+
+
+            Auth auth = authInterface.checkToken(tokenReused);
+            RequestContext.getRequestContext().setAuth(auth);
+            System.out.println("Authentication success");
 //
 //
 //
 //
             String secret  = tokenReused.getSecret();
-            Auth auth2 = authInterface.checkToken(tokenReused);
-            RequestContext.getRequestContext().setAuth(auth2);
-            System.out.println("Authentication success");
             SearchParameters params = new SearchParameters();
             params.setText("#newApproach #forstegreader");
             PhotosInterface photosInterface = flickr.getPhotosInterface();

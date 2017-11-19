@@ -10,7 +10,7 @@ import pl.pb.OSNAPIs.OSNAPIUtility;
 import pl.pb.config.StegHashWebappApplicationConfig;
 import pl.pb.database_access.UserRepository;
 import pl.pb.engine.HashTagChain;
-import pl.pb.model.EnqueuedMessage;
+import pl.pb.model.modelHelperEntities.EnqueuedMessage;
 import pl.pb.jsonMappings.PublishMessage;
 import pl.pb.jsonMappings.ResponseFromStegHash;
 import pl.pb.model.*;
@@ -45,7 +45,7 @@ public class StegPublisherResourceImpl implements StegPublisherResource {
 
     private static volatile int enqueuedMessageObjectNumer = 0;
 
-    private static volatile Set<EnqueuedMessage> enqueuedMessageBus = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private static  Set<EnqueuedMessage> enqueuedMessageBus = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public Response publishHiddenMessage(PublishMessage publishMessage) {
         int maxMessageLength = PropertiesUtility.getInstance().getIntegerProperty("messageLength");
@@ -165,13 +165,16 @@ public class StegPublisherResourceImpl implements StegPublisherResource {
             throw new UploadContentException("No accounts found, please provide some accounts");
         }
 
+        OSNAccount nextOSNAccount = null;
+
         for (int i=0; i < messageParts.size(); i++) {
             BufferedImage steganogram = LSBMethod.setMessage(images.get(i), messageParts.get(i), i);
             List<String> hashtagPermutation = permutations.get(i);
-            String mappingHashtag = hashtagPermutation.get(hashtagPermutation.size() - 1);//get last hashtag -> mapping hashtag
+            String mappingHashtag = getMappingHashtag(hashtagPermutation);
             enqueuedMessage.addPermutation(i, mergeHashtagLists(allHashtags.get(REDUNDANT_HASHTAGS), hashtagPermutation));
             String description = prepareDescription(allHashtags.get(REDUNDANT_HASHTAGS), hashtagPermutation);
-            OSNIndicator indicator = indicators.getIndicatorByHashtag(mappingHashtag);
+            OSNIndicator indicator = indicators.getIndicatorByHashtag(mappingHashtag, nextOSNAccount);
+            nextOSNAccount = indicator.getDestinationOSNAccount();
             publishContent(indicator.getOriginOSNAccount(), steganogram, description);
             addMapping(enqueuedMessage, indicator.getDestinationOSNAccount(), mappingHashtag);
         }
@@ -188,6 +191,11 @@ public class StegPublisherResourceImpl implements StegPublisherResource {
                     "png", ((TwitterAccount) account).getConsumerKey(), ((TwitterAccount) account).getConsumerSecret(),
                     account.getAccessToken(),account.getAccessSecret());
         }
+    }
+
+    private String getMappingHashtag(List<String> hashtagPermutation) {
+        //get last hashtag -> mapping hashtag
+        return hashtagPermutation.get(hashtagPermutation.size() - 1);
     }
 
     private void addMapping(EnqueuedMessage enqueuedMessage, OSNAccount account, String mappingHashtag) {

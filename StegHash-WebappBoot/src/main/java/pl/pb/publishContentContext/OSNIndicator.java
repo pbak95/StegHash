@@ -13,6 +13,8 @@ public class OSNIndicator {
 
     private OSNAccount destinationOsnAccount;
 
+    private boolean isUsed = false;
+
     public OSNIndicator(String hashtag, OSNAccount originOsnAccount, OSNAccount destinationAPI) {
         this.hashtag = hashtag;
         this.originOsnAccount = originOsnAccount;
@@ -41,5 +43,13 @@ public class OSNIndicator {
 
     public void setDestinationOSNAccount(OSNAccount destinationOsnAccount) {
         this.destinationOsnAccount = destinationOsnAccount;
+    }
+
+    public boolean isUsed() {
+        return isUsed;
+    }
+
+    public void setUsed(boolean used) {
+        isUsed = used;
     }
 }
