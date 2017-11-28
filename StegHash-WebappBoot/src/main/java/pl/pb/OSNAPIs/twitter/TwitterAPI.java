@@ -24,40 +24,6 @@ public class TwitterAPI {
     @Autowired
     StegHashWebappApplicationConfig stegHashWebappApplicationConfig;
 
-    public static void main(String args[]) {
-        ConfigurationBuilder cb = new ConfigurationBuilder();
-        cb.setDebugEnabled(false);
-        TwitterFactory tf = new TwitterFactory(cb.build());
-        Twitter twitter = tf.getInstance();
-
-        //GET this properties from USER
-        // Twitter Consumer key & Consumer Secret
-        twitter.setOAuthConsumer("R6xZsRTF9wmqwZGoAdytHN5U3", "OJAb8F1FUj1rjuwhhiahA6hKIXf4oyEp17a7oI0LEX34d0iyhQ");
-        // Twitter Access token & Access token Secret
-        twitter.setOAuthAccessToken(new AccessToken("922092323294580742-CIMeCwx93S4SYCYDb9aGqngjvgQhsFn",
-                "UdVicIeLD8Db5pxkgND6fW2XQmsgqqikQmGRCRShwtjxW"));
-        try {
-            // Getting Twitter Timeline using Twitter4j API
-//            List<Status> statuses = twitter.getHomeTimeline();
-//            System.out.println("Showing home timeline.");
-//            for (Status status : statuses) {
-//                System.out.println(status.getUser().getName() + ":" +
-//                        status.getText());
-//            }
-                //Post a Tweet using Twitter4j API
-//            String message = "#StegHash #Test \n" +
-//                    "https://www.dropbox.com/s/rximzlcnnokabtn/lion_steg.png?dl=0";
-//            Status status = twitter.updateStatus(message);
-//            System.out.println("Successfully updated the status to [" + status.getText() + "].");
-            Query query = new Query("#StegHash #Test");
-            QueryResult result = twitter.search(query);
-            for (Status status : result.getTweets()) {
-                System.out.println("@" + status.getUser().getScreenName() + ":" + status.getText());
-            }
-        } catch (Exception e) {
-        }
-    }
-
     public void publish(BufferedImage image, String description, String format,
                         String consumerToken, String consumerTokenSecret,
                         String accessToken, String accessTokenSecret) throws TwitterException {
@@ -68,7 +34,7 @@ public class TwitterAPI {
             Status status = this.getTwitterInstance(consumerToken, consumerTokenSecret,
                     accessToken, accessTokenSecret).updateStatus(tweetMessage);
             //debug
-            System.out.println("Successfully updated the status to [" + status.getText() + "].");
+            System.out.println("[TWITTER] Successfully updated the status to [" + status.getText() + "].");
         } catch (DropboxException dbxException) {
             throw new TwitterException("[Twitter] There are problems with publishing content, try again later or " +
                     "contact with administrators.");
@@ -112,7 +78,7 @@ public class TwitterAPI {
         } catch (DropboxException e) {
             new TwitterException("[Twitter] Problem with downloading content from Twitter, please contact with administrator.");
         }
-
+        System.out.println("[TWITTER] Successfully get " + downloadedItems.size() + " images.");
         return downloadedItems;
     }
 
@@ -135,5 +101,39 @@ public class TwitterAPI {
     private String getDropboxPath(String statusText) {
         String[] statusParts = statusText.split("\n");
         return statusParts[statusParts.length -1];
+    }
+
+    public static void main(String args[]) {
+        ConfigurationBuilder cb = new ConfigurationBuilder();
+        cb.setDebugEnabled(false);
+        TwitterFactory tf = new TwitterFactory(cb.build());
+        Twitter twitter = tf.getInstance();
+
+        //GET this properties from USER
+        // Twitter Consumer key & Consumer Secret
+        twitter.setOAuthConsumer("R6xZsRTF9wmqwZGoAdytHN5U3", "OJAb8F1FUj1rjuwhhiahA6hKIXf4oyEp17a7oI0LEX34d0iyhQ");
+        // Twitter Access token & Access token Secret
+        twitter.setOAuthAccessToken(new AccessToken("922092323294580742-CIMeCwx93S4SYCYDb9aGqngjvgQhsFn",
+                "UdVicIeLD8Db5pxkgND6fW2XQmsgqqikQmGRCRShwtjxW"));
+        try {
+            // Getting Twitter Timeline using Twitter4j API
+//            List<Status> statuses = twitter.getHomeTimeline();
+//            System.out.println("Showing home timeline.");
+//            for (Status status : statuses) {
+//                System.out.println(status.getUser().getName() + ":" +
+//                        status.getText());
+//            }
+            //Post a Tweet using Twitter4j API
+//            String message = "#StegHash #Test \n" +
+//                    "https://www.dropbox.com/s/rximzlcnnokabtn/lion_steg.png?dl=0";
+//            Status status = twitter.updateStatus(message);
+//            System.out.println("Successfully updated the status to [" + status.getText() + "].");
+            Query query = new Query("#StegHash #Test");
+            QueryResult result = twitter.search(query);
+            for (Status status : result.getTweets()) {
+                System.out.println("@" + status.getUser().getScreenName() + ":" + status.getText());
+            }
+        } catch (Exception e) {
+        }
     }
 }

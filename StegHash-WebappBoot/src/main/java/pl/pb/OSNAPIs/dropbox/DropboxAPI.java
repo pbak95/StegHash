@@ -22,8 +22,7 @@ import java.io.*;
 public class DropboxAPI {
 
     private static final String ACCESS_TOKEN = PropertiesUtility.getInstance().getProperty("dropboxAccessToken");
-    //TO_DO get folder from user info in db
-    private static final String FOLDER = "/StegHash/";
+
     private DbxClientV2 client;
 
     public DropboxAPI() {
@@ -40,6 +39,7 @@ public class DropboxAPI {
             InputStream is = new ByteArrayInputStream(os.toByteArray());
             metadata = this.client.files().uploadBuilder(path)
                     .uploadAndFinish(is);
+            System.out.println("[DROPBOX] Uploaded file: " + metadata.getPathLower());
             return metadata.getPathLower();
             //uncomment if twitter change their api behaviour 3===0
             //return this.client.sharing().createSharedLinkWithSettings(metadata.getPathDisplay()).getUrl();
@@ -58,6 +58,7 @@ public class DropboxAPI {
             DbxDownloader downloader = this.client.files().download(path);
             InputStream is = downloader.getInputStream();
             image = ImageIO.read(is);
+            System.out.println("[DROPBOX] Downloaded file");
         } catch (DbxException dbxException) {
             new DropboxException("[Dropbox] Problem with downloading content from dopbox, contacnt with administrators");
         } catch (IOException ioException) {
@@ -75,6 +76,7 @@ public class DropboxAPI {
             DbxDownloader downloader = this.client.files().download(path);
             InputStream is = downloader.getInputStream();
             image = ImageIO.read(is);
+            System.out.println("[DROPBOX] Downloaded file");
         } catch (DbxException dbxException) {
             new DropboxException("[Dropbox] Problem with downloading content from dopbox, contacnt with administrators");
         } catch (IOException ioException) {

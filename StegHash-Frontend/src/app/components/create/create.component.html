@@ -1,0 +1,45 @@
+<div class="create-content">
+  <form role="form" (submit)="publishMessage()" novalidate>
+
+    <div class="form-group">
+      <div class="info-icon-wrapper" data-balloon-length="medium"
+           data-balloon="Fill with username or couple of usernames separated by spaces." data-balloon-pos="up">
+        <label class="inputLabel">To:</label>
+        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+      </div>
+      <input class="form-control" type="text" [(ngModel)]=to name="to"
+             placeholder="Usernames separated by space">
+    </div>
+
+    <div class="form-group">
+      <div class="info-icon-wrapper" data-balloon-length="medium"
+           data-balloon="Fill with hashtags separated by spaces. Please put most miscellaneous/unique hashtags at
+            the end to improve futher content searching." data-balloon-pos="up">
+        <label class="inputLabel">Hashtags:</label>
+        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+      </div>
+      <input class="form-control" type="text" [(ngModel)]=hashtags id="hashtags" name="hashtags"
+             (ngModelChange)="validateHashtags($event)" placeholder="Hashtags separated by space">
+    <div><p class="hashtags-number" [style.color]="getStyle()">
+      Minimal number of hashtags needed: {{hashtagsNumberNeeded}}</p></div>
+    </div>
+
+    <div class="form-group">
+      <div class="info-icon-wrapper" data-balloon-length="medium"
+           data-balloon="Fill with message you want to hide. Remember to provide appropriate number of hashtags
+            according to message length." data-balloon-pos="up">
+        <label class="inputLabel">Message:</label>
+        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+      </div>
+      <textarea class="form-control" rows="5" id="message" [(ngModel)]=message name="message"
+                (ngModelChange)="calculateHashtagsNumber($event)"></textarea>
+    </div>
+
+    <div class="center">
+      <button type="submit" class="btn btn-primary btn-general" [disabled]="!isValidForm()">Publish message</button>
+    </div>
+
+  </form>
+</div>
+
+

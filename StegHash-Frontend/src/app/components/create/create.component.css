@@ -1,0 +1,20 @@
+.create-content {
+  padding: 10px;
+  background-color: #f8f8f8;
+}
+
+.info-icon-wrapper {
+  display: inline-flex;
+}
+
+span.glyphicon.glyphicon-info-sign {
+  margin-top: 2px;
+}
+
+label.inputLabel {
+  margin-right: 7px;
+}
+
+.hashtags-number {
+  margin-top: 10px;
+}

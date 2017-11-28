@@ -1,22 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { Message, MessagesAggregate } from './home.model';
+import { Message, MessagesAggregate } from './sent.model';
 import {MessagingService} from "../../services/messaging/messaging.service";
 
-
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  selector: 'app-sent',
+  templateUrl: './sent.component.html',
+  styleUrls: ['./sent.component.css']
 })
-export class HomeComponent implements OnInit {
-
+export class SentComponent implements OnInit {
   messages:Message[];
   pages: number = 0; // is the maximum number
   currentIndex: number = 1;
   pagesIndex: Array<number>;
   pageStart: number = 1;
-
-
 
   constructor(private messagingService: MessagingService) {
     this.messages = [];
@@ -24,10 +20,9 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {
     console.log('trigger init');
-    this.messagingService.getUserMessagesReceived(
+    this.messagingService.getUserMessagesSent(
       localStorage.getItem('currentUserName'),this.pageStart, this.updateContent.bind(this)
     );
-
   }
 
   updateContent(receivedMessages: MessagesAggregate): void {
@@ -37,7 +32,6 @@ export class HomeComponent implements OnInit {
     this.pagesIndex =  this.fillArray();
   }
 
-
   fillArray(): any{
     let obj = new Array();
     for(let index = this.pageStart; index < this.pageStart + this.pages; index ++) {
@@ -46,7 +40,7 @@ export class HomeComponent implements OnInit {
     return obj;
   }
   refreshItems(){
-    this.messagingService.getUserMessagesReceived(
+    this.messagingService.getUserMessagesSent(
       localStorage.getItem('currentUserName'),this.currentIndex, this.updateContent.bind(this)
     );
   }
@@ -67,4 +61,5 @@ export class HomeComponent implements OnInit {
     this.currentIndex = index;
     this.refreshItems();
   }
+
 }

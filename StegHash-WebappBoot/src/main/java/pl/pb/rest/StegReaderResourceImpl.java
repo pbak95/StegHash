@@ -6,12 +6,15 @@ import pl.pb.config.StegHashWebappApplicationConfig;
 import pl.pb.database_access.MessageReader;
 import pl.pb.database_access.UserRepository;
 import pl.pb.downloadContentContext.DownloadedItem;
+import pl.pb.downloadContentContext.MessageType;
+import pl.pb.downloadContentContext.RequestMessageObject;
 import pl.pb.exceptions.BrokenMessageException;
 import pl.pb.exceptions.FlickrException;
 import pl.pb.exceptions.TwitterException;
-import pl.pb.jsonMappings.ReceivedMessage;
-import pl.pb.jsonMappings.ReceivedMessagesResponse;
+import pl.pb.jsonMappings.SingleMessage;
+import pl.pb.jsonMappings.MessagesAggregate;
 import pl.pb.jsonMappings.ResponseFromStegHash;
+import pl.pb.jsonMappings.UserMessagesRequest;
 import pl.pb.model.*;
 import pl.pb.steganography.LSB.HiddenData;
 import pl.pb.steganography.LSB.LSBMethod;
@@ -36,18 +39,18 @@ public class StegReaderResourceImpl implements StegReaderResource {
     @Autowired
     UserRepository userRepository;
 
-    private static int NUMBER_OF_MESSAGES_PER_PAGE = 5; //TO_DO
+    private static int NUMBER_OF_MESSAGES_PER_PAGE = 3; //TODO
 
     @Override
-    public Response getUserMessages(String username, int pageNumber) {
-        ReceivedMessagesResponse receivedMessagesResponse = new ReceivedMessagesResponse();
-        MessageReader messageReader = stegHashModelConfig.messageReader();
-        List<Message> userMessages = messageReader.getUserMessages(username);
-        List<ReceivedMessage> receivedMessages = new LinkedList<>();
+    public Response getUserMessages(UserMessagesRequest userMessagesRequest) {
+        MessagesAggregate messagesResponse = new MessagesAggregate();
+        List<Message> userMessages = getMessages(userMessagesRequest);
+        List<SingleMessage> messages = new LinkedList<>();
 
         for (Message userMessage : userMessages) {
             try {
-                receivedMessages.add(getMessageFromOSNs(userMessage, username));
+                messages.add(getMessageFromOSNs(userMessage, generateRequestMessageObject(
+                        userMessagesRequest, userMessage)));
 
             } catch (Exception e) {
                 ResponseFromStegHash response = new ResponseFromStegHash();
@@ -61,11 +64,12 @@ public class StegReaderResourceImpl implements StegReaderResource {
                     e.printStackTrace();
                     return  Response.serverError().entity(response).build();
                 }  else if (e instanceof BrokenMessageException) {
-                    ReceivedMessage brokenMessage = new ReceivedMessage();
+                    SingleMessage brokenMessage = new SingleMessage();
                     brokenMessage.setDate(userMessage.getMessageDate());
                     brokenMessage.setUserFrom(userMessage.getUserFrom().getUsername());
-                    brokenMessage.setMessage(e.getMessage());
-                    receivedMessages.add(brokenMessage);
+                    brokenMessage.setUserTo(userMessage.getUsersTo());
+                    brokenMessage.setContent(e.getMessage());
+                    messages.add(brokenMessage);
                 } else {
                     response.setStatus("Internal server error, try again later or contact with site administrators.");
                     e.printStackTrace();
@@ -74,16 +78,34 @@ public class StegReaderResourceImpl implements StegReaderResource {
             }
         }
 
-        receivedMessagesResponse.setReceivedMessages(receivedMessages);
-        return Response.ok(receivedMessagesResponse, MediaType.APPLICATION_JSON).build();
+        messagesResponse.setMessages(messages);
+        messagesResponse.setCurrentPageNumber(1);
+        messagesResponse.setLastPageNumber(1);
+        return Response.ok(messagesResponse, MediaType.APPLICATION_JSON).build();
     }
 
-    private ReceivedMessage getMessageFromOSNs(Message message,
-                                               String username) throws Exception {
-        User userTo = userRepository.findByUsername(username).get(0);
-        ReceivedMessage receivedMessage = new ReceivedMessage();
+    private  List<Message> getMessages(UserMessagesRequest userMessagesRequest) {
+        MessageReader messageReader = stegHashModelConfig.messageReader();
+        if (userMessagesRequest.getMessageType().equals(MessageType.RECEIVED)) {
+            return messageReader.getUserReceivedMessages(userMessagesRequest.getUsername());
+        } else {
+            return messageReader.getUserSentMessages(userMessagesRequest.getUsername());
+        }
+    }
+
+    private RequestMessageObject generateRequestMessageObject(UserMessagesRequest userMessagesRequest,
+                                                              Message message) {
+        return new RequestMessageObject(message, userMessagesRequest.getMessageType());
+    }
+
+
+    private SingleMessage getMessageFromOSNs(Message message,
+                                             RequestMessageObject requestMessageObject) throws Exception {
+
+        SingleMessage receivedMessage = new SingleMessage();
         receivedMessage.setDate(message.getMessageDate());
         receivedMessage.setUserFrom(message.getUserFrom().getUsername());
+        receivedMessage.setUserTo(message.getUsersTo());
 
         List<OSNMapping> osnMappings = new LinkedList<>(message.getMappings());
         Collections.sort(osnMappings, OSNMapping.MAPPING_COMPARATOR);
@@ -99,7 +121,7 @@ public class StegReaderResourceImpl implements StegReaderResource {
                 List<OSNAPI> osnapis = getFirstOriginAPI(hashtagPermutations, osnMappings);
                 HashtagPermutation hashtagPermutation = getHashtagPermutationByNumber(hashtagPermutations, i);
                 DownloadedItem downloadedItem = downloadedItemFromOSN(hashtagPermutation.getHashtagPermuation(),
-                        osnapis, userTo, message.getUserFrom(), 0);
+                        osnapis, requestMessageObject, 0);
 
                 HiddenData hiddenData = LSBMethod.getHiddenData(downloadedItem.getBufferedImage());
                 hiddenMessage.append(hiddenData.getMessage());
@@ -110,7 +132,7 @@ public class StegReaderResourceImpl implements StegReaderResource {
                 HashtagPermutation hashtagPermutation = getHashtagPermutationByNumber(hashtagPermutations,
                         nextPermutationNumber);
                 DownloadedItem downloadedItem = downloadedItemFromOSN(hashtagPermutation.getHashtagPermuation(),
-                        nextOsn, userTo, message.getUserFrom(), nextPermutationNumber);
+                        nextOsn, requestMessageObject, nextPermutationNumber);
 
                 HiddenData hiddenData = LSBMethod.getHiddenData(downloadedItem.getBufferedImage());
                 hiddenMessage.append(hiddenData.getMessage());
@@ -121,20 +143,20 @@ public class StegReaderResourceImpl implements StegReaderResource {
             }
         }
 
-        receivedMessage.setMessage(hiddenMessage.toString());
+        receivedMessage.setContent(hiddenMessage.toString());
 
         return receivedMessage;
     }
 
     private DownloadedItem downloadedItemFromOSN(String hashtagPermutationStr, List<OSNAPI> osnapis,
-                                                 User userTo, User userFrom,
+                                                 RequestMessageObject requestMessageObject,
                                                  int expectedPermutationNumber) throws Exception {
         DownloadedItem downloadedItem = null;
 
         for (int i = 0; i < osnapis.size(); i++) {
             try {
                 downloadedItem = getCorrectDownloadedItem(hashtagPermutationStr,
-                        osnapis.get(i), userTo, userFrom, expectedPermutationNumber);
+                        osnapis.get(i), requestMessageObject, expectedPermutationNumber);
                 if (downloadedItem != null) {
                     return downloadedItem;
                 }
@@ -193,11 +215,11 @@ public class StegReaderResourceImpl implements StegReaderResource {
     }
 
     private DownloadedItem getCorrectDownloadedItem(String hashtagPermutationStr, OSNAPI osnapi,
-                                                    User userTo, User userFrom,
+                                                    RequestMessageObject requestMessageObject,
                                                     int expectedPermutationNumber) throws Exception {
         DownloadedItem correctItem = null;
         List<DownloadedItem> downloadedItems = getDownloadedItems(hashtagPermutationStr,
-                osnapi, userTo, userFrom);
+                osnapi, requestMessageObject);
         for (DownloadedItem item : downloadedItems) {
             try {
                 HiddenData hiddenData = LSBMethod.getHiddenData(item.getBufferedImage());
@@ -211,19 +233,34 @@ public class StegReaderResourceImpl implements StegReaderResource {
         }
 
         if (correctItem == null) {
-            throw new BrokenMessageException("Message broken or no messages.");
+            if (downloadedItems.size() == 0) {
+                throw new BrokenMessageException("Message not found, probably published content has not been indexed yet, " +
+                        "try again later.");
+            } else {
+                throw new BrokenMessageException("Message broken or no messages.");
+            }
         }
         return correctItem;
     }
 
     private List<DownloadedItem> getDownloadedItems(String hashtagpermutationStr, OSNAPI osnapi,
-                                         User userTo, User userFrom) throws FlickrException, TwitterException {
+                                                    RequestMessageObject requestMessageObject) throws FlickrException, TwitterException {
         List<DownloadedItem> downloadedItems = new ArrayList<>();
+        User accountProvider;
+        User contentOwner = requestMessageObject.getMessage().getUserFrom();
+
+        if (requestMessageObject.equals(MessageType.RECEIVED)) {
+            accountProvider = new ArrayList<>(requestMessageObject.getMessage().getUsersTo()).get(0);
+        } else {
+            accountProvider = requestMessageObject.getMessage().getUserFrom();
+        }
+
+
         switch (osnapi) {
             case FLICKR:
-               FlickrAccount flickrAccount = (FlickrAccount) getRandomAccount(userTo.getFlickrAccountSet());
-               List<String> possibleUserFromIds = getFlickrUsersAccountsIds(userFrom);
-                for (String userFromId : possibleUserFromIds) {
+               FlickrAccount flickrAccount = (FlickrAccount) getRandomAccount(accountProvider.getFlickrAccountSet());
+               List<String> ownerAccountsIds = getFlickrUsersAccountsIds(contentOwner);
+                for (String userFromId : ownerAccountsIds) {
                     downloadedItems = stegHashWebappApplicationConfig.flickrAPI()
                                     .downloadImages(hashtagpermutationStr, flickrAccount.getConsumerKey(),
                                             flickrAccount.getConsumerSecret(), flickrAccount.getAccessToken(),
@@ -239,7 +276,7 @@ public class StegReaderResourceImpl implements StegReaderResource {
                 }
                 break;
             case TWITTER:
-                TwitterAccount twitterAccount = (TwitterAccount) getRandomAccount(userTo.getTwitterAccountSet());
+                TwitterAccount twitterAccount = (TwitterAccount) getRandomAccount(accountProvider.getTwitterAccountSet());
                 downloadedItems = stegHashWebappApplicationConfig.twitterAPI()
                         .downloadImages(hashtagpermutationStr, twitterAccount.getConsumerKey(),
                                 twitterAccount.getConsumerSecret(), twitterAccount.getAccessToken(),

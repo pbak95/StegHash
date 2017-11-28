@@ -15,7 +15,10 @@ public class MessageReader {
     @Autowired
     UserRepository userRepository;
 
-    public List<Message> getUserMessages(String username) {
+    @Autowired
+    MessageRepository messageRepository;
+
+    public List<Message> getUserReceivedMessages(String username) {
         List<Message> userMessages = new LinkedList<>();
 
         User targetUser = userRepository.findByUsername(username).get(0);
@@ -27,5 +30,10 @@ public class MessageReader {
         Collections.sort(userMessages, Message.MESSAGE_COMPARATOR);
 
         return userMessages;
+    }
+
+    public List<Message> getUserSentMessages(String username) {
+        User userFrom = userRepository.findByUsername(username).get(0);
+        return messageRepository.findByUserFrom(userFrom);
     }
 }

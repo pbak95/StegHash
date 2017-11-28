@@ -5,13 +5,33 @@
         <a class="navbar-brand">StegHash</a>
       </div>
       <ul class="nav navbar-nav navbar-right">
-        <li class="active"><a routerLink="/home" routerLinkActive="active">Home</a></li>
-        <li class="active">    <a routerLink="/settings" routerLinkActive="active">Settings</a>
-        </li>
+        <li class="settings"><a routerLink="/settings" routerLinkActive="active">Settings</a></li>
+        <li><a (click)="logout()">Logout</a></li>
       </ul>
     </div>
   </nav>
 </div>
 <div class="mainContainer">
-  <router-outlet></router-outlet>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-3 col-lg-2">
+        <nav class="navbar navbar-default navbar-fixed-side">
+          <div class="nav-container">
+            <div class="navbar-header text-center">
+              <button class="btn btn-default btn-general create-msg-btn" (click)="createMessage()" >Create message</button>
+            </div>
+            <div class="collapse navbar-collapse">
+              <ul class="nav navbar-nav">
+                <li><a routerLink="/home" routerLinkActive="active">Received</a></li>
+                <li><a routerLink="/sent" routerLinkActive="active">Sent</a></li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+      </div>
+      <div class="col-sm-9 col-lg-10">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </div>
 </div>

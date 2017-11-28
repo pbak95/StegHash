@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import pl.pb.config.StegHashModelConfig;
 import pl.pb.database_access.MessagePublisher;
 import pl.pb.exceptions.*;
+import pl.pb.jsonMappings.*;
+import pl.pb.model.User;
 import pl.pb.publishContentContext.OSNIndicator;
 import pl.pb.model.OSNAPI;
 import pl.pb.OSNAPIs.OSNAPIUtility;
@@ -11,8 +13,6 @@ import pl.pb.config.StegHashWebappApplicationConfig;
 import pl.pb.database_access.UserRepository;
 import pl.pb.engine.HashTagChain;
 import pl.pb.model.modelHelperEntities.EnqueuedMessage;
-import pl.pb.jsonMappings.PublishMessage;
-import pl.pb.jsonMappings.ResponseFromStegHash;
 import pl.pb.model.*;
 import pl.pb.publishContentContext.OSNIndicators;
 import pl.pb.steganography.LSB.LSBMethod;
@@ -276,9 +276,5 @@ public class StegPublisherResourceImpl implements StegPublisherResource {
         mergedList.addAll(redundantHashtags);
         mergedList.addAll(hashtagPermutation);
         return mergedList;
-    }
-
-    public String test() {
-        return "Hello";
     }
 }

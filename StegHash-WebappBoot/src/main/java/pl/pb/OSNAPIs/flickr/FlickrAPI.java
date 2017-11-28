@@ -38,6 +38,7 @@ public class FlickrAPI {
     public void publish(BufferedImage image, String description, String format,
                         String consumerToken, String consumerTokenSecret,
                         String accessToken, String accessTokenSecret) throws Exception {
+
         Flickr flickr = getFlickrInstance(consumerToken, consumerTokenSecret);
         Uploader uploader = flickr.getUploader();
         AuthInterface authInterface = flickr.getAuthInterface();
@@ -45,23 +46,26 @@ public class FlickrAPI {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         ImageIO.write(image, format, os); //e.g. png
         InputStream is = new ByteArrayInputStream(os.toByteArray());
+
         UploadMetaData metaData = new UploadMetaData();
         metaData.setPublicFlag(true);
         metaData.setFriendFlag(true);
         metaData.setFamilyFlag(true);
         metaData.setFilemimetype("image/" + format); //HARDCODED - change it later
         //metaData.setTitle("StegHash tests");
+
         String[] hashtags = description.split(" ");
         List<String> hashtagsList = Arrays.asList(hashtags);
         hashtagsList.forEach(s -> s.replace("#",""));
         metaData.setTags(Arrays.asList(hashtags));
         //TO_DO get this parameters for requested user
+
         Token tokenReused = new Token(accessToken, accessTokenSecret);
         Auth auth = authInterface.checkToken(tokenReused);
         RequestContext.getRequestContext().setAuth(auth);
-        System.out.println("Authentication success");
+        System.out.println("[FLICKR] Authentication success");
         String photoId = uploader.upload(is,metaData);
-        System.out.println("Uploaded photo id: " + photoId);
+        System.out.println("[FLICKR] Uploaded photo id: " + photoId);
     }
 
     private Flickr getFlickrInstance(String consumerToken, String consumerTokenSecret) {
@@ -75,11 +79,13 @@ public class FlickrAPI {
         PhotosInterface photosInterface = flickr.getPhotosInterface();
         List<DownloadedItem> downloadedItems = new ArrayList<>();
         AuthInterface authInterface = flickr.getAuthInterface();
+
         Token tokenReused = new Token(accessToken, accessTokenSecret);
+
         try {
             Auth auth = authInterface.checkToken(tokenReused);
             RequestContext.getRequestContext().setAuth(auth);
-            System.out.println("Authentication success");
+            System.out.println("[FLICKR] Authentication success");
 
             SearchParameters searchParameters = new SearchParameters();
             searchParameters.setTags(getTagsArrayFromString(hashtagPermutationStr));
@@ -103,15 +109,16 @@ public class FlickrAPI {
             });
         } catch (com.flickr4java.flickr.FlickrException e) {
             throw new FlickrException("[Flickr] Authentication credentials error, ensure that you have " +
-                    "provide valid Access Token/Access Token Secret In case there are valid, just refresh them :).");
+                    "provide valid Access Token/Access Token Secret In case there are valid, just refresh them :)");
         }
-
+        System.out.println("[FLICKR] Successfully downloaded " + downloadedItems.size() + " images.");
         return downloadedItems;
     }
 
     private PhotoList<Photo> getOriginalPhotos(PhotoList<Photo> photos, PhotosInterface photosInterface,
                                                String secret) throws com.flickr4java.flickr.FlickrException {
         PhotoList<Photo> originalPhotos = new PhotoList<>();
+
         for (Photo photo : photos) {
             Photo originalPhoto = photosInterface.getInfo(photo.getId(), secret);
             originalPhotos.add(originalPhoto);
@@ -131,9 +138,11 @@ public class FlickrAPI {
         Pattern pattern = Pattern.compile("#(\\w+)");
         Matcher matcher = pattern.matcher(hashtagPermutationStr);
         List<String> tags = new ArrayList<>();
+
         while (matcher.find()) {
             tags.add(matcher.group(1));
         }
+
         return tags.stream().toArray(String[]::new);
     }
 
@@ -229,9 +238,9 @@ public class FlickrAPI {
                 }
             });
 //
-//            Auth auth = authInterface.checkToken(tokenReused);
-//            RequestContext.getRequestContext().setAuth(auth);
-//            System.out.println("Authentication success");
+//          Auth auth = authInterface.checkToken(tokenReused);
+//          RequestContext.getRequestContext().setAuth(auth);
+//          System.out.println("Authentication success");
             in = new FileInputStream(pathToImage);
             photoId = uploader.upload(in,metaData);
             System.out.println("Uploaded photo id: " + photoId);
@@ -239,11 +248,5 @@ public class FlickrAPI {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
-
-
-
-        //Collection results = testInterface.echo(Collections.EMPTY_MAP);
     }
 }

@@ -54,7 +54,8 @@ public class OSNIndicators {
             if (i == accounts.size() - 1) {
                 //last account, so to avoid null, set next indicator to origin from first indicator
                 indicators.add(new OSNIndicator(hashtags.get(i),
-                        originAccount, indicators.get(0).getOriginOSNAccount()));
+                        originAccount, indicators.size() > 0 ? indicators.get(0).getOriginOSNAccount() :
+                originAccount));
             } else {
                 for (int j = 0; j < accounts.size(); j++) {
                     OSNAccount nextOSNAccount = accounts.get(j);
