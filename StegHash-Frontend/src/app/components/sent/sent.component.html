@@ -1,4 +1,4 @@
-<div class='row'>
+<div class='row' *ngIf="!loading && !connectionError">
   <div class="panel panel-default">
     <!-- Default panel contents -->
     <div class='panel-heading'></div>
@@ -33,4 +33,6 @@
       </div>
     </div>
   </div>
-
+</div>
+<div *ngIf="loading"><p class="info">Loading...</p></div>
+<div *ngIf="connectionError"><p class="info">Connection error!</p></div>

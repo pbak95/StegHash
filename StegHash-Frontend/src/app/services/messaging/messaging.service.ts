@@ -50,7 +50,7 @@ export class MessagingService {
             currentPageNumber: 1,
             messages: new Array<Message>()
           };
-          alert(errResp.status);
+          console.log(errResp.status);
           callback(response);
         });
   }

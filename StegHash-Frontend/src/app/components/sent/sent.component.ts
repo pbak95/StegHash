@@ -13,6 +13,8 @@ export class SentComponent implements OnInit {
   currentIndex: number = 1;
   pagesIndex: Array<number>;
   pageStart: number = 1;
+  loading: boolean = true;
+  connectionError: boolean = false;
 
   constructor(private messagingService: MessagingService) {
     this.messages = [];
@@ -26,10 +28,15 @@ export class SentComponent implements OnInit {
   }
 
   updateContent(receivedMessages: MessagesAggregate): void {
-    this.messages = receivedMessages.messages;
-    this.currentIndex = receivedMessages.currentPageNumber;
-    this.pages = receivedMessages.lastPageNumber;
-    this.pagesIndex =  this.fillArray();
+    if (receivedMessages.messages.length > 0) {
+      this.messages = receivedMessages.messages;
+      this.currentIndex = receivedMessages.currentPageNumber;
+      this.pages = receivedMessages.lastPageNumber;
+      this.pagesIndex =  this.fillArray();
+    } else {
+      this.connectionError = true;
+    }
+    this.loading = false;
   }
 
   fillArray(): any{

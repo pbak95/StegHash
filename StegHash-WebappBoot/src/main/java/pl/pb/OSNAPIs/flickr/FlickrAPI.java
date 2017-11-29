@@ -90,7 +90,7 @@ public class FlickrAPI {
             SearchParameters searchParameters = new SearchParameters();
             searchParameters.setTags(getTagsArrayFromString(hashtagPermutationStr));
             searchParameters.setUserId(userOwnerId);
-            PhotoList<Photo> photoList = photosInterface.search(searchParameters, 10, 1);
+            PhotoList<Photo> photoList = photosInterface.search(searchParameters, 100, 1);
             PhotoList<Photo> originalPhotos = getOriginalPhotos(photoList, photosInterface,
                     tokenReused.getSecret());
 
