@@ -24,6 +24,7 @@ import pl.pb.steganography.LSB.LSBMethod;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -44,6 +45,8 @@ public class StegReaderResourceImpl implements StegReaderResource {
     private static int NUMBER_OF_MESSAGES_PER_PAGE = 3; //TODO
 
     private static Logger LOGGER = LoggerFactory.getLogger(StegReaderResourceImpl.class);
+
+    private static Map<UUID, List<DownloadedItem>> downloadedContentCache = new ConcurrentHashMap<>();
 
     @Override
     public Response getUserMessages(UserMessagesRequest userMessagesRequest) {
@@ -103,8 +106,8 @@ public class StegReaderResourceImpl implements StegReaderResource {
 
     private RequestMessageObject generateRequestMessageObject(UserMessagesRequest userMessagesRequest,
                                                               Message message) {
-        UUID uuid1 = UUID.randomUUID();
-        return new RequestMessageObject(message, userMessagesRequest.getMessageType());
+        UUID messageUUID = UUID.randomUUID();
+        return new RequestMessageObject(message, userMessagesRequest.getMessageType(), messageUUID);
     }
 
 
@@ -161,17 +164,21 @@ public class StegReaderResourceImpl implements StegReaderResource {
                                                  RequestMessageObject requestMessageObject,
                                                  int expectedPermutationNumber) throws Exception {
         DownloadedItem downloadedItem = null;
+        Set<OSNAPI> usedOSNs = new HashSet<>();
 
         for (int i = 0; i < osnapis.size(); i++) {
-            try {
-                downloadedItem = getCorrectDownloadedItem(hashtagPermutationStr,
-                        osnapis.get(i), requestMessageObject, expectedPermutationNumber);
-                if (downloadedItem != null) {
-                    return downloadedItem;
-                }
-            } catch (BrokenMessageException e) {
-                if (i == osnapis.size() - 1) {
-                    throw new BrokenMessageException(e.getMessage());
+            if (!usedOSNs.contains(osnapis.get(i))) {
+                try {
+                    downloadedItem = getCorrectDownloadedItem(hashtagPermutationStr,
+                            osnapis.get(i), requestMessageObject, expectedPermutationNumber);
+                    if (downloadedItem != null) {
+                        return downloadedItem;
+                    }
+                } catch (BrokenMessageException e) {
+                    usedOSNs.add(osnapis.get(i));
+                    if (i == osnapis.size() - 1) {
+                        throw new BrokenMessageException(e.getMessage());
+                    }
                 }
             }
         }
@@ -227,22 +234,32 @@ public class StegReaderResourceImpl implements StegReaderResource {
                                                     RequestMessageObject requestMessageObject,
                                                     int expectedPermutationNumber) throws Exception {
         DownloadedItem correctItem = null;
-        List<DownloadedItem> downloadedItems = getDownloadedItems(hashtagPermutationStr,
-                osnapi, requestMessageObject);
-        for (DownloadedItem item : downloadedItems) {
-            try {
-                HiddenData hiddenData = LSBMethod.getHiddenData(item.getBufferedImage());
-                if (hiddenData.getPermutationNumber() == expectedPermutationNumber) {
-                    correctItem = item;
-                    break;
-                }
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
+
+        if (downloadedContentCache.containsKey(requestMessageObject.getUuid())) {
+            List<DownloadedItem> itemsFromCache = downloadedContentCache.get(requestMessageObject.getUuid());
+            correctItem = extractImage(itemsFromCache, expectedPermutationNumber);
+
+            if (correctItem == null) {
+                List<DownloadedItem> downloadedItems = getDownloadedItems(hashtagPermutationStr,
+                        osnapi, requestMessageObject);
+                downloadedItems.forEach(downloadedItem -> {
+                    if (!downloadedContentCache.get(requestMessageObject.getUuid()).contains(downloadedItem)) {
+                        downloadedContentCache.get(requestMessageObject.getUuid()).add(downloadedItem);
+                    }
+                });
+                correctItem = extractImage(downloadedItems, expectedPermutationNumber);
             }
+
+        } else {
+            List<DownloadedItem> downloadedItems = getDownloadedItems(hashtagPermutationStr,
+                    osnapi, requestMessageObject);
+            downloadedContentCache.put(requestMessageObject.getUuid(), downloadedItems);
+            correctItem = extractImage(downloadedItems, expectedPermutationNumber);
+
         }
 
         if (correctItem == null) {
-            if (downloadedItems.size() == 0) {
+            if (downloadedContentCache.get(requestMessageObject.getUuid()).size() == 0) {
                 throw new BrokenMessageException("Message not found, probably content has not been indexed yet, " +
                         " or it's too old to restore.");
             } else {
@@ -250,6 +267,23 @@ public class StegReaderResourceImpl implements StegReaderResource {
             }
         }
         return correctItem;
+    }
+
+    private DownloadedItem extractImage(List<DownloadedItem> potentialSteganograms, int expectedPermutationNumber) {
+
+        DownloadedItem extractedItem = null;
+        for (DownloadedItem item : potentialSteganograms) {
+            try {
+                HiddenData hiddenData = LSBMethod.getHiddenData(item.getBufferedImage());
+                if (hiddenData.getPermutationNumber() == expectedPermutationNumber) {
+                    extractedItem = item;
+                    break;
+                }
+            } catch (Exception e) {
+                //throw new BrokenMessageException(e.getMessage());
+            }
+        }
+        return extractedItem;
     }
 
     private List<DownloadedItem> getDownloadedItems(String hashtagpermutationStr, OSNAPI osnapi,

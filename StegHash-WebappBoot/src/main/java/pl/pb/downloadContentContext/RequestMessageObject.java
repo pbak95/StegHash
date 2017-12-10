@@ -3,6 +3,8 @@ package pl.pb.downloadContentContext;
 import pl.pb.model.Message;
 import pl.pb.model.User;
 
+import java.util.UUID;
+
 /**
  * Created by Patryk on 11/20/2017.
  */
@@ -12,9 +14,12 @@ public class RequestMessageObject {
 
     private MessageType messageType;
 
-    public RequestMessageObject(Message message, MessageType messageType) {
+    private UUID uuid;
+
+    public RequestMessageObject(Message message, MessageType messageType, UUID uuid) {
         this.message = message;
         this.messageType = messageType;
+        this.uuid = uuid;
     }
 
 
@@ -32,5 +37,13 @@ public class RequestMessageObject {
 
     public void setMessageType(MessageType messageType) {
         this.messageType = messageType;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 }
