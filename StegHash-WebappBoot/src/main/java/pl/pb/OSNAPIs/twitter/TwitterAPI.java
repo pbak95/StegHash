@@ -24,6 +24,9 @@ public class TwitterAPI {
     @Autowired
     StegHashWebappApplicationConfig stegHashWebappApplicationConfig;
 
+    private static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(TwitterAPI.class);
+
+
     public void publish(BufferedImage image, String description, String format,
                         String consumerToken, String consumerTokenSecret,
                         String accessToken, String accessTokenSecret) throws TwitterException {
@@ -34,7 +37,7 @@ public class TwitterAPI {
             Status status = this.getTwitterInstance(consumerToken, consumerTokenSecret,
                     accessToken, accessTokenSecret).updateStatus(tweetMessage);
             //debug
-            System.out.println("[TWITTER] Successfully updated the status to [" + status.getText() + "].");
+            LOGGER.info("[TWITTER] Successfully updated status to [" + status.getText() + "].");
         } catch (DropboxException dbxException) {
             throw new TwitterException("[Twitter] There are problems with publishing content, try again later or " +
                     "contact with administrators.");
@@ -55,6 +58,7 @@ public class TwitterAPI {
         DropboxAPI dbxAPI = stegHashWebappApplicationConfig.dropboxAPI();
 
         Query query = new Query(hashtagPermutationStr);
+        query.setCount(100);
         try {
             QueryResult result = twitter.search(query);
             for (Status status : result.getTweets()) {
@@ -78,7 +82,7 @@ public class TwitterAPI {
         } catch (DropboxException e) {
             new TwitterException("[Twitter] Problem with downloading content from Twitter, please contact with administrator.");
         }
-        System.out.println("[TWITTER] Successfully get " + downloadedItems.size() + " images.");
+        LOGGER.info("[TWITTER] Successfully downloaded " + downloadedItems.size() + " images.");
         return downloadedItems;
     }
 

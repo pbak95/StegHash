@@ -1,5 +1,7 @@
 package pl.pb.rest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.pb.config.StegHashModelConfig;
 import pl.pb.database_access.MessagePublisher;
@@ -24,6 +26,7 @@ import javax.ws.rs.core.Response;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.IntStream;
 
 /**
  * Created by Patryk on 10/18/2017.
@@ -46,6 +49,9 @@ public class StegPublisherResourceImpl implements StegPublisherResource {
     private static volatile int enqueuedMessageObjectNumer = 0;
 
     private static  Set<EnqueuedMessage> enqueuedMessageBus = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+    private static Logger LOGGER = LoggerFactory.getLogger(StegPublisherResourceImpl.class);
+
 
     public Response publishHiddenMessage(PublishMessage publishMessage) {
         int maxMessageLength = PropertiesUtility.getInstance().getIntegerProperty("messageLength");
@@ -74,24 +80,21 @@ public class StegPublisherResourceImpl implements StegPublisherResource {
                 case RANDOM:
                     List<BufferedImage> images = ImageUtility.getRandomNumberOfImages(osnNumber);
                     userFrom = userRepository.findByUsername(publishMessage.getFrom()).get(0); //handling multiple accounts in sharedAPIs
+                    LOGGER.info("[StegPublisher] Option: [RANDOM] Start publishing user message");
                     enrichedEnqueuedMessage = uploadContent(userFrom, sharedAPIs, Arrays.asList(publishMessage.getHashtags()),
                             images, osnNumber, publishMessage.getMessage(), enqueuedMessage);
+                    LOGGER.info("[StegPublisher] Message published successfully");
                     //Everything ok, so we push data related with message to DB
                     MessagePublisher messagePublisher = stegHashModelConfig.messagePublisher();
                     messagePublisher.publishAllMessageElementsToDB(enrichedEnqueuedMessage);
+                    LOGGER.info("[StegPublisher] Message metadata published to database");
                     break;
             }
-
-        } catch (DataConsistencyException e) {
-            e.printStackTrace();
-            enqueuedMessageBus.remove(enqueuedMessage);
-            return  Response.serverError().entity(e.getMessage()).build();
-        } catch (ValidationException e) {
-            e.printStackTrace();
-            enqueuedMessageBus.remove(enqueuedMessage);
-            return Response.serverError().entity(e.getMessage()).build();
         } catch (Exception e) {
             ResponseFromStegHash response = new ResponseFromStegHash();
+
+            LOGGER.error("[StegReader] Error during publishing message for user: " + publishMessage.getFrom());
+            LOGGER.error(e.getMessage());
 
             if (e instanceof DataConsistencyException) {
                 response.setStatus(e.getMessage());
@@ -127,9 +130,10 @@ public class StegPublisherResourceImpl implements StegPublisherResource {
         Map<Integer, List<String>> chainOfHashtags = HashTagChain.generateChainOfHashtags(
                 allHashtags.get(VALUABLE_HASHTAGS));
 
-        List <String> messageParts = new ArrayList<>(Arrays.asList(message.split("(?<=\\G.{" +
+        String messageWithoutNewLines = message.replace('\n', ' ');
+        List <String> messageParts = new ArrayList<>(Arrays.asList(messageWithoutNewLines.split("(?<=\\G.{" +
                 PropertiesUtility.getInstance().getIntegerProperty("messageLength") + "})")));
-        messageParts.forEach(System.out::println);
+        //messageParts.forEach(System.out::println);
 
         chainOfHashtags.forEach((n,perm) -> permutations.add(perm));
 
@@ -236,18 +240,29 @@ public class StegPublisherResourceImpl implements StegPublisherResource {
         Map<Integer, List<String>> result = new HashMap<>();
         List<String> redundantHashtags = new ArrayList<>();
         List<String> valuableHashtags = new ArrayList<>();
-        if (hashtags.size() > osnNumber) {
-            int maxIndex = hashtags.size() - 1;
+        int maxPermutationsNumber = IntStream.rangeClosed( 1, hashtags.size() )
+                .reduce(1, ( int a, int b ) -> a * b);
 
-            for (int i = 0; i < osnNumber; i++) {
-                valuableHashtags.add(hashtags.get(maxIndex--));
+        if (maxPermutationsNumber >= osnNumber) {
+            int redundantHashtagsNumber = 0;
+            for (int i = hashtags.size() - 1; i > 1; i--) {
+                int temporaryPermutationsNumber = IntStream.rangeClosed( 1, i)
+                        .reduce(1, ( int a, int b ) -> a * b);
+                if (temporaryPermutationsNumber > osnNumber) {
+                    redundantHashtagsNumber++;
+                } else {
+                    break;
+                }
             }
 
-            for (int j = 0; j <= maxIndex; j++) {
+            int maxIndex = hashtags.size() - 1;
+            for (int i = maxIndex; i > redundantHashtagsNumber - 1; i--) {
+                valuableHashtags.add(hashtags.get(i));
+            }
+
+            for (int j = 0; j < redundantHashtagsNumber; j++) {
                 redundantHashtags.add(hashtags.get(j));
             }
-        } else if (hashtags.size() == osnNumber) {
-            valuableHashtags.addAll(hashtags);
         } else {
             throw new ValidationException("Incompatible number of hashtags to message size!");
         }

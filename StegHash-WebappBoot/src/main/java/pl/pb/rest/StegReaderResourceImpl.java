@@ -1,5 +1,7 @@
 package pl.pb.rest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.pb.config.StegHashModelConfig;
 import pl.pb.config.StegHashWebappApplicationConfig;
@@ -41,6 +43,8 @@ public class StegReaderResourceImpl implements StegReaderResource {
 
     private static int NUMBER_OF_MESSAGES_PER_PAGE = 3; //TODO
 
+    private static Logger LOGGER = LoggerFactory.getLogger(StegReaderResourceImpl.class);
+
     @Override
     public Response getUserMessages(UserMessagesRequest userMessagesRequest) {
         MessagesAggregate messagesResponse = new MessagesAggregate();
@@ -49,11 +53,15 @@ public class StegReaderResourceImpl implements StegReaderResource {
 
         for (Message userMessage : userMessages) {
             try {
+                LOGGER.info("[StegReader] Start building message: " + userMessage.getId());
                 messages.add(getMessageFromOSNs(userMessage, generateRequestMessageObject(
                         userMessagesRequest, userMessage)));
-
+                LOGGER.info("[StegReader] Message built successfully : " + userMessage.getId());
             } catch (Exception e) {
                 ResponseFromStegHash response = new ResponseFromStegHash();
+
+                LOGGER.error("[StegReader] Error during building message : " + userMessage.getId());
+                LOGGER.error(e.getMessage());
 
                 if (e instanceof FlickrException) {
                     response.setStatus(e.getMessage());
@@ -95,6 +103,7 @@ public class StegReaderResourceImpl implements StegReaderResource {
 
     private RequestMessageObject generateRequestMessageObject(UserMessagesRequest userMessagesRequest,
                                                               Message message) {
+        UUID uuid1 = UUID.randomUUID();
         return new RequestMessageObject(message, userMessagesRequest.getMessageType());
     }
 
@@ -234,8 +243,8 @@ public class StegReaderResourceImpl implements StegReaderResource {
 
         if (correctItem == null) {
             if (downloadedItems.size() == 0) {
-                throw new BrokenMessageException("Message not found, probably published content has not been indexed yet, " +
-                        "try again later.");
+                throw new BrokenMessageException("Message not found, probably content has not been indexed yet, " +
+                        " or it's too old to restore.");
             } else {
                 throw new BrokenMessageException("Message broken or no messages.");
             }

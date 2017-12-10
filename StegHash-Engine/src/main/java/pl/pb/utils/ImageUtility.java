@@ -28,7 +28,6 @@ public class ImageUtility {
         for (int i=0; i < number; i++) {
             Collections.shuffle(fileNames);
             randomNames.add(fileNames.get(0));
-            fileNames.remove(0);
         }
 
         randomNames.forEach(name -> {

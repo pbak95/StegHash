@@ -14,6 +14,8 @@ import pl.pb.rest.*;
 @Configuration
 public class StegHashWebappApplicationConfig {
 
+
+
     @Bean
     public StegPublisherResource stegPublisherResource() {
         return new StegPublisherResourceImpl();

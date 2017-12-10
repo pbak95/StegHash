@@ -31,7 +31,9 @@ public class MessagePublisher {
         HashtagPermutationDAO hashtagPermutationDAO = stegHashModelConfig.hashtagPermutationDAO();
 
         User userFrom = userRepository.findByUsername(enqueuedMessage.getUserFrom()).get(0);
-        List<User> userTo = userRepository.findByUsername(enqueuedMessage.getUserTo());
+        List<User> userTo = new ArrayList<>();
+        enqueuedMessage.getUserTo().forEach(user -> userTo.add(userRepository.findByUsername(
+                user).get(0)));
 
         Message newMessage = new Message();
 
@@ -54,8 +56,8 @@ public class MessagePublisher {
         });
 
         newMessage.setMessageDate(getCurrentDate());
-        newMessage.setUsersTo(new HashSet<>(userRepository.findByUsername(enqueuedMessage.getUserTo())));
-        newMessage.setUserFrom(userRepository.findByUsername(enqueuedMessage.getUserFrom()).get(0));
+        newMessage.setUsersTo(new HashSet<>(userTo));
+        newMessage.setUserFrom(userFrom);
         newMessage.setHashtagPermutations(new HashSet<>(hashtagPermutationsList));
 
         userFrom.addUserMessageSent(newMessage);

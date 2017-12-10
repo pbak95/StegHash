@@ -11,10 +11,14 @@ import {Router} from "@angular/router";
 })
 export class AppComponent implements OnInit {
 
+  username: string = "";
+
   ngOnInit() {
   }
 
-  constructor(private authorizationService: AuthorizationService, private router: Router){}
+  constructor(private authorizationService: AuthorizationService, private router: Router){
+    this.username = localStorage.getItem('currentUserName');
+  }
 
   logout() {
     console.log("Logout!");

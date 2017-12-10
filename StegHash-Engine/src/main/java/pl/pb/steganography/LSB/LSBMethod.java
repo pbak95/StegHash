@@ -1,12 +1,12 @@
 package pl.pb.steganography.LSB;
 
-import org.omg.CORBA.MARSHAL;
 import pl.pb.utils.PropertiesUtility;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.nio.charset.Charset;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Patryk on 2017-10-04.
@@ -15,14 +15,17 @@ public class LSBMethod {
 
     private static String MAKRUP = "~#<";
 
+    private static Logger LOGGER = LoggerFactory.getLogger(LSBMethod.class);
+
+
     public static BufferedImage setMessage(BufferedImage image , String message, int permutationNumber) throws Exception {  // <- String name
         byte[] messageInBytes = getBytes(addStartMarkup(message));
         int capacity = PropertiesUtility.getInstance().getIntegerProperty("capacity");
         int permutationNumberLength = PropertiesUtility.getInstance().getIntegerProperty("permutationNumberLength");
         if (capacity == -1) {
-            throw new Exception("Bad format of capacity parameter!");
+            throw new Exception("[StegHash Engine] Bad format of capacity parameter!");
         }
-        System.out.println("Size: " + image.getWidth() + " x " + image.getHeight());
+        LOGGER.info("[StegHash Engine] Carrier size: " + image.getWidth() + " x " + image.getHeight());
         //set number of bytes with message length
         LSBMethod.setMessageParam(image, messageInBytes.length, capacity, 0);
         //set permutation number
@@ -48,7 +51,7 @@ public class LSBMethod {
             System.arraycopy(emptyArr, 0, paramInBytes, 0, emptyArr.length);
             System.arraycopy(tmp, 0, paramInBytes, emptyArr.length, tmp.length);
         } else if (paramInBytes.length > paramSize) {
-            throw new Exception("Capacity is to small!");
+            throw new Exception("[StegHash Engine] Capacity is to small!");
         }
         encodeBytesInPixels(image, paramInBytes,offset);
     }
@@ -73,7 +76,7 @@ public class LSBMethod {
                 if (j > imgWidthPixelSize) {
                     j = 0;
                     if (i == imgHeightPixelSize && (b == data[data.length -1] && k != 0)) {
-                        throw new Exception("Carrier capacity is to small!");
+                        throw new Exception("[StegHash Engine] Carrier capacity is to small!");
                     }
                     i++;
                 }
@@ -87,14 +90,14 @@ public class LSBMethod {
         int permutationNumberLength = PropertiesUtility.getInstance().getIntegerProperty("permutationNumberLength");
 
         if (capacity == -1) {
-            throw new Exception("Bad format of capacity parameter!");
+            throw new Exception("[StegHash Engine] Bad format of capacity parameter!");
         }
         int messageLength = getMessageParam(image, capacity,0);
         int permutationNumber = getMessageParam(image, permutationNumberLength, capacity * 8);
         byte [] hiddenBytes = decodeBytesFromPixels(image, messageLength,(capacity + permutationNumberLength) * 8);
         String hiddenMessage = new String(hiddenBytes);
         if (!hiddenMessage.startsWith(LSBMethod.MAKRUP)) {
-            throw new Exception("Corrupted hidden message.");
+            throw new Exception("[StegHash Engine] Corrupted hidden message.");
         }
         return new HiddenData(removeMarkup(hiddenMessage), permutationNumber);
     }
@@ -122,7 +125,7 @@ public class LSBMethod {
                 if (j > imgWidthPixelSize) {
                     j = 0;
                     if (i == imgHeightPixelSize && l == capacity - 1 && k < 7) {
-                        throw new Exception("Carrier capacity is to small!");
+                        throw new Exception("[StegHash Engine] Carrier capacity is to small!");
                     }
                     i++;
                 }

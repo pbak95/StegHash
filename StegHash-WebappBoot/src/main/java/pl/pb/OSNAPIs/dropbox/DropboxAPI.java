@@ -9,6 +9,8 @@ import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.sharing.SharedLinkMetadata;
 import com.dropbox.core.v2.users.FullAccount;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.pb.exceptions.DropboxException;
 import pl.pb.utils.PropertiesUtility;
 
@@ -25,6 +27,9 @@ public class DropboxAPI {
 
     private DbxClientV2 client;
 
+    private static Logger LOGGER = LoggerFactory.getLogger(DropboxAPI.class);
+
+
     public DropboxAPI() {
         DbxRequestConfig config = new DbxRequestConfig("dropbox/steghash", "en_US");
         this.client = new DbxClientV2(config, ACCESS_TOKEN);
@@ -39,14 +44,14 @@ public class DropboxAPI {
             InputStream is = new ByteArrayInputStream(os.toByteArray());
             metadata = this.client.files().uploadBuilder(path)
                     .uploadAndFinish(is);
-            System.out.println("[DROPBOX] Uploaded file: " + metadata.getPathLower());
+            LOGGER.info("[DROPBOX] Uploaded file: " + metadata.getPathLower());
             return metadata.getPathLower();
             //uncomment if twitter change their api behaviour 3===0
             //return this.client.sharing().createSharedLinkWithSettings(metadata.getPathDisplay()).getUrl();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (DbxException e) {
-            throw new DropboxException("[Dropbox] Authentication credentials expired, ensure that you have " +
+            throw new DropboxException("[DROPBOX] Authentication credentials expired, ensure that you have " +
                     "provide valid accessToken.");
         }
         return "";
@@ -58,7 +63,7 @@ public class DropboxAPI {
             DbxDownloader downloader = this.client.files().download(path);
             InputStream is = downloader.getInputStream();
             image = ImageIO.read(is);
-            System.out.println("[DROPBOX] Downloaded file");
+            LOGGER.info("[DROPBOX] Downloaded file");
         } catch (DbxException dbxException) {
             new DropboxException("[Dropbox] Problem with downloading content from dopbox, contacnt with administrators");
         } catch (IOException ioException) {
@@ -76,7 +81,7 @@ public class DropboxAPI {
             DbxDownloader downloader = this.client.files().download(path);
             InputStream is = downloader.getInputStream();
             image = ImageIO.read(is);
-            System.out.println("[DROPBOX] Downloaded file");
+            LOGGER.info("[DROPBOX] Downloaded file");
         } catch (DbxException dbxException) {
             new DropboxException("[Dropbox] Problem with downloading content from dopbox, contacnt with administrators");
         } catch (IOException ioException) {

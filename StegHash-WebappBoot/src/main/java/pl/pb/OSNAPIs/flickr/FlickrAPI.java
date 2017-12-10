@@ -16,6 +16,8 @@ import com.flickr4java.flickr.uploader.Uploader;
 import com.flickr4java.flickr.util.AuthStore;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.pb.downloadContentContext.DownloadedItem;
 import pl.pb.exceptions.FlickrException;
 import pl.pb.utils.PropertiesUtility;
@@ -34,6 +36,9 @@ import java.util.regex.Pattern;
 public class FlickrAPI {
 
     private Map<String, Token> accessTokenProcessing = new ConcurrentHashMap<>();
+
+    private static Logger LOGGER = LoggerFactory.getLogger(FlickrAPI.class);
+
 
     public void publish(BufferedImage image, String description, String format,
                         String consumerToken, String consumerTokenSecret,
@@ -63,9 +68,9 @@ public class FlickrAPI {
         Token tokenReused = new Token(accessToken, accessTokenSecret);
         Auth auth = authInterface.checkToken(tokenReused);
         RequestContext.getRequestContext().setAuth(auth);
-        System.out.println("[FLICKR] Authentication success");
+        LOGGER.info("[FLICKR] Authentication success");
         String photoId = uploader.upload(is,metaData);
-        System.out.println("[FLICKR] Uploaded photo id: " + photoId);
+        LOGGER.info("[FLICKR] Uploaded photo id: " + photoId);
     }
 
     private Flickr getFlickrInstance(String consumerToken, String consumerTokenSecret) {
@@ -85,7 +90,7 @@ public class FlickrAPI {
         try {
             Auth auth = authInterface.checkToken(tokenReused);
             RequestContext.getRequestContext().setAuth(auth);
-            System.out.println("[FLICKR] Authentication success");
+            LOGGER.info("[FLICKR] Authentication success");
 
             SearchParameters searchParameters = new SearchParameters();
             searchParameters.setTags(getTagsArrayFromString(hashtagPermutationStr));
@@ -108,10 +113,10 @@ public class FlickrAPI {
                 downloadedItems.add(downloadedItem);
             });
         } catch (com.flickr4java.flickr.FlickrException e) {
-            throw new FlickrException("[Flickr] Authentication credentials error, ensure that you have " +
+            throw new FlickrException("[FLICKR] Authentication credentials error, ensure that you have " +
                     "provide valid Access Token/Access Token Secret In case there are valid, just refresh them :)");
         }
-        System.out.println("[FLICKR] Successfully downloaded " + downloadedItems.size() + " images.");
+        LOGGER.info("[FLICKR] Successfully downloaded " + downloadedItems.size() + " images.");
         return downloadedItems;
     }
 
