@@ -6,7 +6,7 @@ import pl.pb.model.Message;
 /**
  * Created by Patryk on 11/11/2017.
  */
-public class MessageDAO extends GenericDAO {
+public class MessageDAO extends GenericAbstractDAO {
 
     @Transactional
     public void addMessage(Message message){

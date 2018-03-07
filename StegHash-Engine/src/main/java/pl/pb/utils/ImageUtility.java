@@ -20,7 +20,7 @@ public class ImageUtility {
         return img;
     }
 
-    public static List<BufferedImage> getRandomNumberOfImages(int number) {
+    public static List<BufferedImage> getRandomImages(int number) {
         List<BufferedImage> images = new ArrayList<>();
         File directory = new File(PropertiesUtility.getInstance().getProperty("images"));
         List<String> fileNames = new ArrayList<String>(Arrays.asList(directory.list()));

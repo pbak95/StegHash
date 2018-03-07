@@ -1,7 +1,7 @@
 package pl.pb.model.modelHelperEntities;
 
 
-import pl.pb.model.OSNAPI;
+import pl.pb.model.OSNType;
 import pl.pb.model.OSNMapping;
 
 import java.util.*;
@@ -53,10 +53,10 @@ public class EnqueuedMessage {
         return osnApiMappings;
     }
 
-    public void addOsnApiMapping(String hashtag, OSNAPI api) {
+    public void addOsnApiMapping(String hashtag, OSNType api) {
         OSNMapping osnMapping = new OSNMapping();
         osnMapping.setHashtag(hashtag);
-        osnMapping.setOsnApi(api);
+        osnMapping.setOsnType(api);
         this.osnApiMappings.add(osnMapping);
     }
 

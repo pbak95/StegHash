@@ -55,16 +55,23 @@ public class StegReaderResourceImpl implements StegReaderResource {
         List<SingleMessage> messages = new LinkedList<>();
 
         for (Message userMessage : userMessages) {
+            RequestMessageObject requestMessageObject = null;
             try {
                 LOGGER.info("[StegReader] Start building message: " + userMessage.getId());
-                messages.add(getMessageFromOSNs(userMessage, generateRequestMessageObject(
-                        userMessagesRequest, userMessage)));
+                requestMessageObject = generateRequestMessageObject(
+                        userMessagesRequest, userMessage);
+                messages.add(getMessageFromOSNs(userMessage, requestMessageObject));
                 LOGGER.info("[StegReader] Message built successfully : " + userMessage.getId());
+                downloadedContentCache.remove(requestMessageObject.getUuid());
             } catch (Exception e) {
                 ResponseFromStegHash response = new ResponseFromStegHash();
 
                 LOGGER.error("[StegReader] Error during building message : " + userMessage.getId());
                 LOGGER.error(e.getMessage());
+
+                if (requestMessageObject != null) {
+                    downloadedContentCache.remove(requestMessageObject.getUuid());
+                }
 
                 if (e instanceof FlickrException) {
                     response.setStatus(e.getMessage());
@@ -124,13 +131,13 @@ public class StegReaderResourceImpl implements StegReaderResource {
         List<HashtagPermutation> hashtagPermutations =  new LinkedList<>(message.getHashtagPermutations());
         Collections.sort(hashtagPermutations, HashtagPermutation.HASHTAG_PERMUTATION_COMPARATOR);
 
-        List<OSNAPI> nextOsn = null;
+        List<OSNType> nextOsn = null;
         int nextPermutationNumber = 0;
         StringBuffer hiddenMessage = new StringBuffer("");
 
         for (int i = 0; i < osnMappings.size(); i++) {
             if (i == 0) {
-                List<OSNAPI> osnapis = getFirstOriginAPI(hashtagPermutations, osnMappings);
+                List<OSNType> osnapis = getFirstOriginAPI(hashtagPermutations, osnMappings);
                 HashtagPermutation hashtagPermutation = getHashtagPermutationByNumber(hashtagPermutations, i);
                 DownloadedItem downloadedItem = downloadedItemFromOSN(hashtagPermutation.getHashtagPermuation(),
                         osnapis, requestMessageObject, 0);
@@ -160,11 +167,11 @@ public class StegReaderResourceImpl implements StegReaderResource {
         return receivedMessage;
     }
 
-    private DownloadedItem downloadedItemFromOSN(String hashtagPermutationStr, List<OSNAPI> osnapis,
+    private DownloadedItem downloadedItemFromOSN(String hashtagPermutationStr, List<OSNType> osnapis,
                                                  RequestMessageObject requestMessageObject,
                                                  int expectedPermutationNumber) throws Exception {
         DownloadedItem downloadedItem = null;
-        Set<OSNAPI> usedOSNs = new HashSet<>();
+        Set<OSNType> usedOSNs = new HashSet<>();
 
         for (int i = 0; i < osnapis.size(); i++) {
             if (!usedOSNs.contains(osnapis.get(i))) {
@@ -191,24 +198,24 @@ public class StegReaderResourceImpl implements StegReaderResource {
     }
 
     //last mapping hashtag of last permutation indicate to to first origin api
-    private List<OSNAPI> getFirstOriginAPI(List<HashtagPermutation> hashtagPermutations, List<OSNMapping> osnMappings) {
+    private List<OSNType> getFirstOriginAPI(List<HashtagPermutation> hashtagPermutations, List<OSNMapping> osnMappings) {
         HashtagPermutation hashtagPermutation = hashtagPermutations.get(hashtagPermutations.size() -1);
         List<String> hastags = Arrays.asList(hashtagPermutation.getHashtagPermuation().split(" "));
         return getOSNAPIByLastHashtag(hastags, osnMappings);
     }
 
-    private List<OSNAPI> getOSNAPIByLastHashtag(List<String> hashtagsFromOSN, List<OSNMapping> osnMappings) {
+    private List<OSNType> getOSNAPIByLastHashtag(List<String> hashtagsFromOSN, List<OSNMapping> osnMappings) {
         String mappingHashtag = hashtagsFromOSN.get(hashtagsFromOSN.size() -1);
-        List<OSNAPI> osnapis = new ArrayList<>();
+        List<OSNType> osnapis = new ArrayList<>();
         //Check if '#' is present, some apis returns tags without '#'
         if (!mappingHashtag.startsWith("#")) {
             mappingHashtag = "#" + mappingHashtag;
         }
         for (OSNMapping mapping : osnMappings) {
             if (mapping.getHashtag().equals(mappingHashtag)) {
-                osnapis.add(mapping.getOsnApi());
+                osnapis.add(mapping.getOsnType());
             } else if (mapping.getHashtag().toLowerCase().equals(mappingHashtag)) {
-                osnapis.add(mapping.getOsnApi());
+                osnapis.add(mapping.getOsnType());
             }
         }
         return osnapis;
@@ -230,7 +237,7 @@ public class StegReaderResourceImpl implements StegReaderResource {
         return permutation;
     }
 
-    private DownloadedItem getCorrectDownloadedItem(String hashtagPermutationStr, OSNAPI osnapi,
+    private DownloadedItem getCorrectDownloadedItem(String hashtagPermutationStr, OSNType osnapi,
                                                     RequestMessageObject requestMessageObject,
                                                     int expectedPermutationNumber) throws Exception {
         DownloadedItem correctItem = null;
@@ -286,13 +293,13 @@ public class StegReaderResourceImpl implements StegReaderResource {
         return extractedItem;
     }
 
-    private List<DownloadedItem> getDownloadedItems(String hashtagpermutationStr, OSNAPI osnapi,
+    private List<DownloadedItem> getDownloadedItems(String hashtagpermutationStr, OSNType osnapi,
                                                     RequestMessageObject requestMessageObject) throws FlickrException, TwitterException {
         List<DownloadedItem> downloadedItems = new ArrayList<>();
         User accountProvider;
         User contentOwner = requestMessageObject.getMessage().getUserFrom();
 
-        if (requestMessageObject.equals(MessageType.RECEIVED)) {
+        if (requestMessageObject.getMessageType().equals(MessageType.RECEIVED)) {
             accountProvider = new ArrayList<>(requestMessageObject.getMessage().getUsersTo()).get(0);
         } else {
             accountProvider = requestMessageObject.getMessage().getUserFrom();
@@ -311,7 +318,7 @@ public class StegReaderResourceImpl implements StegReaderResource {
                     /**
                      * break if find any items, because it will be inefficient
                      * searching for all possible user accounts -> in case when
-                     * results will not satisfying, remove break and loop for all
+                     * results will not be satisfying, remove break and loop for all
                      */
                     if (downloadedItems.size() > 0) {
                         break;
@@ -323,7 +330,7 @@ public class StegReaderResourceImpl implements StegReaderResource {
                 downloadedItems = stegHashWebappApplicationConfig.twitterAPI()
                         .downloadImages(hashtagpermutationStr, twitterAccount.getConsumerKey(),
                                 twitterAccount.getConsumerSecret(), twitterAccount.getAccessToken(),
-                                twitterAccount.getAccessSecret());
+                                twitterAccount.getAccessSecret(), null);
                 break;
         }
 

@@ -6,7 +6,7 @@ import pl.pb.model.TwitterAccount;
 /**
  * Created by Patryk on 10/29/2017.
  */
-public class TwitterAccountDAO extends GenericDAO {
+public class TwitterAccountDAO extends GenericAbstractDAO {
 
     @Transactional
     public void addTwitterAccount(TwitterAccount account){

@@ -1,6 +1,7 @@
 package pl.pb.OSNAPIs.twitter;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import pl.pb.OSNAPIs.OSNAbstractAPI;
 import pl.pb.OSNAPIs.dropbox.DropboxAPI;
 import pl.pb.config.StegHashWebappApplicationConfig;
 import pl.pb.downloadContentContext.DownloadedItem;
@@ -19,7 +20,7 @@ import java.util.List;
 /**
  * Created by Patryk on 10/22/2017.
  */
-public class TwitterAPI {
+public class TwitterAPI extends OSNAbstractAPI {
 
     @Autowired
     StegHashWebappApplicationConfig stegHashWebappApplicationConfig;
@@ -42,7 +43,7 @@ public class TwitterAPI {
             throw new TwitterException("[Twitter] There are problems with publishing content, try again later or " +
                     "contact with administrators.");
         } catch (twitter4j.TwitterException twitterexception) {
-            throw new TwitterException("[Twitter] Authentication credentials error, ensure that you have " +
+            throw new TwitterException("[Twitter] Authorization credentials error, ensure that you have " +
                     "provide valid Access Token/Access Token Secret or Consumer Key/Consumer Secret. " +
                     "In case there are valid, just refresh them :).");
         }
@@ -51,7 +52,7 @@ public class TwitterAPI {
 
     public List<DownloadedItem> downloadImages(String hashtagPermutationStr,String consumerToken,
                                                String consumerTokenSecret, String accessToken,
-                                               String accessTokenSecret ) throws TwitterException {
+                                               String accessTokenSecret, String userOwnerId) throws TwitterException {
         List<DownloadedItem> downloadedItems = new ArrayList<>();
         Twitter twitter =  this.getTwitterInstance(consumerToken, consumerTokenSecret,
                 accessToken, accessTokenSecret);
@@ -62,25 +63,27 @@ public class TwitterAPI {
         try {
             QueryResult result = twitter.search(query);
             for (Status status : result.getTweets()) {
-                DownloadedItem downloadedItem = new DownloadedItem();
-                List<String> hashtags = new LinkedList<>();
+                try {
+                    DownloadedItem downloadedItem = new DownloadedItem();
+                    List<String> hashtags = new LinkedList<>();
 
-                HashtagEntity[] hashtagEntities = status.getHashtagEntities();
-                List<HashtagEntity> hashtagEntityList = Arrays.asList(hashtagEntities);
-                hashtagEntityList.forEach(hashtagEntity -> hashtags.add(hashtagEntity.getText()));
-                downloadedItem.setHashtags(hashtags);
+                    HashtagEntity[] hashtagEntities = status.getHashtagEntities();
+                    List<HashtagEntity> hashtagEntityList = Arrays.asList(hashtagEntities);
+                    hashtagEntityList.forEach(hashtagEntity -> hashtags.add(hashtagEntity.getText()));
+                    downloadedItem.setHashtags(hashtags);
 
-                BufferedImage image = dbxAPI.downloadByPath(getDropboxPath(status.getText()));
-                downloadedItem.setBufferedImage(image);
+                    BufferedImage image = dbxAPI.downloadByPath(getDropboxPath(status.getText()));
+                    downloadedItem.setBufferedImage(image);
 
-                downloadedItems.add(downloadedItem);
+                    downloadedItems.add(downloadedItem);
+                } catch (Exception e) {
+                    //Eat exception in case of tweets without dropbox path
+                }
             }
         } catch (twitter4j.TwitterException twitterexception) {
             new TwitterException("[Twitter] Problem with downloading content from Twitter, ensure that you have " +
                     "provide valid Access Token/Access Token Secret or Consumer Key/Consumer Secret. " +
                     "In case there are valid, just refresh them :).");
-        } catch (DropboxException e) {
-            new TwitterException("[Twitter] Problem with downloading content from Twitter, please contact with administrator.");
         }
         LOGGER.info("[TWITTER] Successfully downloaded " + downloadedItems.size() + " images.");
         return downloadedItems;

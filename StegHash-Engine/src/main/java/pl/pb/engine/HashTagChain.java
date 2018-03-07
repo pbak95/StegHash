@@ -127,7 +127,7 @@ public class HashTagChain {
 
 	public static void main(String[] args) {
 
-		List<String> test = new ArrayList<String>(Arrays.asList("#Warsaw", "#home", "#Poland", "#test123"));
+		List<String> test = new ArrayList<String>(Arrays.asList("#alpha", "#bravo", "#charlie"));
 		Map<Integer, List<String>> resultChain = generateChainOfHashtags(test);
 		resultChain.forEach((a, b) -> {
 			System.out.println("Address: " + a);

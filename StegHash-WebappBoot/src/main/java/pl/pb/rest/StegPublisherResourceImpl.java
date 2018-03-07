@@ -9,7 +9,7 @@ import pl.pb.exceptions.*;
 import pl.pb.jsonMappings.*;
 import pl.pb.model.User;
 import pl.pb.publishContentContext.OSNIndicator;
-import pl.pb.model.OSNAPI;
+import pl.pb.model.OSNType;
 import pl.pb.OSNAPIs.OSNAPIUtility;
 import pl.pb.config.StegHashWebappApplicationConfig;
 import pl.pb.database_access.UserRepository;
@@ -57,7 +57,7 @@ public class StegPublisherResourceImpl implements StegPublisherResource {
         int maxMessageLength = PropertiesUtility.getInstance().getIntegerProperty("messageLength");
         //number of OSN need to publish whole message
         int osnNumber = (int) Math.ceil((double) publishMessage.getMessage().length() / maxMessageLength);
-        Map<OSNAPI, Boolean> sharedAPIs;
+        Map<OSNType, Boolean> sharedAPIs;
         User userFrom;
         EnqueuedMessage enrichedEnqueuedMessage;
 
@@ -78,7 +78,7 @@ public class StegPublisherResourceImpl implements StegPublisherResource {
                     //TODO
                     break;
                 case RANDOM:
-                    List<BufferedImage> images = ImageUtility.getRandomNumberOfImages(osnNumber);
+                    List<BufferedImage> images = ImageUtility.getRandomImages(osnNumber);
                     userFrom = userRepository.findByUsername(publishMessage.getFrom()).get(0); //handling multiple accounts in sharedAPIs
                     LOGGER.info("[StegPublisher] Option: [RANDOM] Start publishing user message");
                     enrichedEnqueuedMessage = uploadContent(userFrom, sharedAPIs, Arrays.asList(publishMessage.getHashtags()),
@@ -118,8 +118,8 @@ public class StegPublisherResourceImpl implements StegPublisherResource {
         return Response.ok(response, MediaType.APPLICATION_JSON).build();
     }
 
-    private EnqueuedMessage uploadContent(User user, Map<OSNAPI, Boolean> sharedAPIs,List<String> hashtagFromUser,
-        List<BufferedImage> images, int osnNumber, String message, EnqueuedMessage enqueuedMessage) throws Exception {
+    private EnqueuedMessage uploadContent(User user, Map<OSNType, Boolean> sharedAPIs, List<String> hashtagFromUser,
+                                          List<BufferedImage> images, int osnNumber, String message, EnqueuedMessage enqueuedMessage) throws Exception {
         final Set<TwitterAccount> twitterAccountSet = new HashSet<>();
         final Set<FlickrAccount> flickrAccountSet = new HashSet<>();
         Map<Integer, List<String>> allHashtags = getHashtagPrefixAndPermutations(hashtagFromUser, osnNumber);
@@ -154,7 +154,7 @@ public class StegPublisherResourceImpl implements StegPublisherResource {
 
         if (twitterAccountSet.size() > 0 && flickrAccountSet.size() > 0) {
             List<OSNAccount> mergedAccounts = new ArrayList<>();
-            int numberOfAccooutns1 = (int) Math.floor(osnNumber / 2);
+            int numberOfAccooutns1 = (int) Math.floor(osnNumber / 2); //Check all types and divide according to that
             int numberOfAccooutns2 = osnNumber - numberOfAccooutns1;
             List<OSNAccount> availableTwitterAccounts = getRandomAccounts(twitterAccountSet,numberOfAccooutns1);
             List<OSNAccount> availableFlickrAccounts = getRandomAccounts(flickrAccountSet,numberOfAccooutns2);
@@ -204,9 +204,9 @@ public class StegPublisherResourceImpl implements StegPublisherResource {
 
     private void addMapping(EnqueuedMessage enqueuedMessage, OSNAccount account, String mappingHashtag) {
         if (account instanceof FlickrAccount) {
-            enqueuedMessage.addOsnApiMapping(mappingHashtag, OSNAPI.FLICKR);
+            enqueuedMessage.addOsnApiMapping(mappingHashtag, OSNType.FLICKR);
         } else if (account instanceof TwitterAccount) {
-            enqueuedMessage.addOsnApiMapping(mappingHashtag, OSNAPI.TWITTER);
+            enqueuedMessage.addOsnApiMapping(mappingHashtag, OSNType.TWITTER);
         }
     }
 

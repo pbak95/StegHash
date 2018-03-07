@@ -3,14 +3,14 @@ package pl.pb.database_access;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import pl.pb.exceptions.DataConsistencyException;
-import pl.pb.model.OSNAPI;
+import pl.pb.model.OSNType;
 import pl.pb.model.User;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class UserDAO extends GenericDAO {
+public class UserDAO extends GenericAbstractDAO {
 
 	@Autowired
 	UserRepository userRepository;
@@ -25,8 +25,8 @@ public class UserDAO extends GenericDAO {
 		getSession().merge(user);
 	}
 
-	public Map<OSNAPI, Boolean> getAccountsForUser(String username) throws DataConsistencyException {
-		Map<OSNAPI, Boolean> accountsMap = new HashMap<>();
+	public Map<OSNType, Boolean> getAccountsForUser(String username) throws DataConsistencyException {
+		Map<OSNType, Boolean> accountsMap = new HashMap<>();
 		List<User> users = userRepository.findByUsername(username);
 
 		if (users.size() > 1) {
@@ -38,15 +38,15 @@ public class UserDAO extends GenericDAO {
 		User user = users.get(0);
 
 		if (user.getTwitterAccountSet().size() > 0) {
-			accountsMap.put(OSNAPI.TWITTER, true);
+			accountsMap.put(OSNType.TWITTER, true);
 		} else {
-			accountsMap.put(OSNAPI.TWITTER, false);
+			accountsMap.put(OSNType.TWITTER, false);
 		}
 
 		if (user.getFlickrAccountSet().size() > 0) {
-			accountsMap.put(OSNAPI.FLICKR, true);
+			accountsMap.put(OSNType.FLICKR, true);
 		} else {
-			accountsMap.put(OSNAPI.FLICKR, false);
+			accountsMap.put(OSNType.FLICKR, false);
 		}
 		return accountsMap;
 	}

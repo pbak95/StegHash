@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Created by Patryk on 11/11/2017.
  */
-public abstract class GenericDAO {
+public abstract class GenericAbstractDAO {
 
     @Autowired
     protected SessionFactory sessionFactory;

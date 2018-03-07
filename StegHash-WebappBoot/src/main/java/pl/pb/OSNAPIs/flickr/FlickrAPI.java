@@ -18,6 +18,7 @@ import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.pb.OSNAPIs.OSNAbstractAPI;
 import pl.pb.downloadContentContext.DownloadedItem;
 import pl.pb.exceptions.FlickrException;
 import pl.pb.utils.PropertiesUtility;
@@ -33,7 +34,7 @@ import java.util.regex.Pattern;
 /**
  * Created by Patryk on 10/23/2017.
  */
-public class FlickrAPI {
+public class FlickrAPI extends OSNAbstractAPI {
 
     private Map<String, Token> accessTokenProcessing = new ConcurrentHashMap<>();
 
@@ -68,7 +69,7 @@ public class FlickrAPI {
         Token tokenReused = new Token(accessToken, accessTokenSecret);
         Auth auth = authInterface.checkToken(tokenReused);
         RequestContext.getRequestContext().setAuth(auth);
-        LOGGER.info("[FLICKR] Authentication success");
+        LOGGER.info("[FLICKR] Authorization success");
         String photoId = uploader.upload(is,metaData);
         LOGGER.info("[FLICKR] Uploaded photo id: " + photoId);
     }
@@ -90,7 +91,7 @@ public class FlickrAPI {
         try {
             Auth auth = authInterface.checkToken(tokenReused);
             RequestContext.getRequestContext().setAuth(auth);
-            LOGGER.info("[FLICKR] Authentication success");
+            LOGGER.info("[FLICKR] Authorization success");
 
             SearchParameters searchParameters = new SearchParameters();
             searchParameters.setTags(getTagsArrayFromString(hashtagPermutationStr));
@@ -113,7 +114,7 @@ public class FlickrAPI {
                 downloadedItems.add(downloadedItem);
             });
         } catch (com.flickr4java.flickr.FlickrException e) {
-            throw new FlickrException("[FLICKR] Authentication credentials error, ensure that you have " +
+            throw new FlickrException("[FLICKR] Authorization credentials error, ensure that you have " +
                     "provide valid Access Token/Access Token Secret In case there are valid, just refresh them :)");
         }
         LOGGER.info("[FLICKR] Successfully downloaded " + downloadedItems.size() + " images.");

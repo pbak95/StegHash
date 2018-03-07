@@ -20,8 +20,8 @@ public class OSNMapping {
     @Column(name = "MAPPING_HASHTAG", nullable = false)
     private String hashtag;
 
-    @Column(name = "OSN_API", nullable = false)
-    private OSNAPI osnApi;
+    @Column(name = "OSN_TYPE_ID", nullable = false)
+    private OSNType osnType;
 
     @JsonManagedReference
     @ManyToOne(fetch = FetchType.EAGER)
@@ -41,12 +41,12 @@ public class OSNMapping {
     }
 
     @Enumerated(EnumType.ORDINAL)
-    public OSNAPI getOsnApi() {
-        return osnApi;
+    public OSNType getOsnType() {
+        return osnType;
     }
 
-    public void setOsnApi(OSNAPI osnApi) {
-        this.osnApi = osnApi;
+    public void setOsnType(OSNType osnType) {
+        this.osnType = osnType;
     }
 
     public Message getMessage() {

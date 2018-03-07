@@ -6,7 +6,7 @@ import pl.pb.model.OSNMapping;
 /**
  * Created by Patryk on 11/11/2017.
  */
-public class OSNMappingDAO extends GenericDAO {
+public class OSNMappingDAO extends GenericAbstractDAO {
 
     @Transactional
     public void addOSNMapping(OSNMapping mapping){
