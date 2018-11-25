@@ -1,2 +1,2 @@
 # StegHash
-The implementation of method called StegHash. This is new method for information hiding in open social networks, which is based on used of hashtag in various open social media networks to connect multimedia files with embedded hidden messages.
+The implementation of method called StegHash. This is new method for information hiding in open social networks, which is based on the usage of hashtags in various open social networks to connect multimedia files with embedded hidden messages.
